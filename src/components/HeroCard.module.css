@@ -1,0 +1,171 @@
+/* ============================================
+   HERO CARD
+   ============================================ */
+.card {
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-normal),
+    transform var(--transition-fast);
+}
+
+.link {
+  text-decoration: none;
+  display: block;
+}
+
+.link:hover .card {
+  border-color: var(--color-accent);
+  box-shadow: var(--glow-accent);
+  transform: translateY(-2px);
+}
+
+.link:hover .name {
+  color: var(--color-accent-glow);
+}
+
+/* Sizes */
+.sm {
+  width: 120px;
+}
+
+.md {
+  width: 160px;
+}
+
+.lg {
+  width: 200px;
+}
+
+/* ============================================
+   IMAGE
+   ============================================ */
+.imageWrap {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-bg-elevated);
+}
+
+.sm .imageWrap {
+  height: 68px;
+}
+
+.md .imageWrap {
+  height: 90px;
+}
+
+.lg .imageWrap {
+  height: 112px;
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  transition: transform var(--transition-normal);
+}
+
+.link:hover .image {
+  transform: scale(1.05);
+}
+
+/* ============================================
+   INFO
+   ============================================ */
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-sm);
+}
+
+.name {
+  font-family: var(--font-display);
+  font-weight: var(--weight-bold);
+  font-size: var(--text-body);
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color var(--transition-fast);
+}
+
+.sm .name {
+  font-size: var(--text-caption);
+}
+
+.winRate {
+  font-family: var(--font-body);
+  font-weight: var(--weight-light);
+  font-size: var(--text-caption);
+  color: var(--color-positive);
+}
+
+.subtitle {
+  font-family: var(--font-body);
+  font-weight: var(--weight-light);
+  font-size: var(--text-caption);
+  color: var(--color-text-muted);
+}
+
+/* ============================================
+   HERO MINI
+   ============================================ */
+.mini {
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+/* ============================================
+   HERO INLINE
+   ============================================ */
+.inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.inlineIconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 43px; /* Matches hero mini width (24h * 127/71 aspect) */
+  flex-shrink: 0;
+}
+
+.inlineIconSquare {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.inlineIconImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.inlineName {
+  font-weight: var(--weight-regular);
+  color: var(--color-text);
+}
+
+.inlineLink {
+  text-decoration: none;
+}
+
+.inlineLink:hover .inlineName {
+  color: var(--color-accent-glow);
+  text-decoration: underline;
+}

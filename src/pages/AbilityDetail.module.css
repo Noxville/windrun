@@ -1,0 +1,184 @@
+/* ============================================
+   ABILITY PROFILE (in title row)
+   ============================================ */
+.abilityProfile {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.ultimateTag {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-accent2);
+  background: rgba(251, 191, 36, 0.15);
+  border: 1px solid var(--color-accent2);
+  border-radius: var(--radius-sm);
+}
+
+.heroLink {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+.heroLink:hover {
+  text-decoration: underline;
+}
+
+/* ============================================
+   CHART
+   ============================================ */
+.chartSection {
+  margin-top: var(--space-lg);
+}
+
+.chartTitle {
+  margin: 0 0 var(--space-md) 0;
+  font-family: var(--font-display);
+  font-weight: var(--weight-regular);
+  font-size: var(--text-h3);
+  color: var(--color-text);
+}
+
+.chartHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-md);
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.typeSelector {
+  display: flex;
+  gap: 2px;
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 2px;
+}
+
+.typeButton {
+  padding: var(--space-xs) var(--space-md);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  font-size: var(--text-caption);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.typeButton:hover {
+  color: var(--color-text);
+}
+
+.typeButton.active {
+  background: var(--color-accent);
+  color: var(--color-bg);
+}
+
+.chart {
+  position: relative;
+  width: calc(100% - 16px);
+  min-height: 400px;
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm);
+}
+
+.axis text {
+  fill: #aaa;
+  font-size: 11px;
+}
+
+.axis line,
+.axis path {
+  stroke: #555;
+}
+
+.bar {
+  transition: opacity 0.15s;
+}
+
+.bar:hover {
+  opacity: 1 !important;
+}
+
+/* ============================================
+   CHART TOOLTIP
+   ============================================ */
+.chartTooltip {
+  position: absolute;
+  z-index: 100;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm);
+  font-family: var(--font-body);
+  font-size: var(--text-caption);
+  color: var(--color-text);
+  pointer-events: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  white-space: nowrap;
+}
+
+/* ============================================
+   LEGEND
+   ============================================ */
+.chartLegend {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-lg);
+  margin-top: var(--space-md);
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-family: var(--font-body);
+  font-size: var(--text-caption);
+  color: var(--color-text-muted);
+}
+
+.legendBar {
+  width: 16px;
+  height: 10px;
+  border-radius: 2px;
+  opacity: 0.7;
+}
+
+.legendLine {
+  width: 20px;
+  height: 3px;
+  border-radius: 2px;
+}
+
+.legendArea {
+  width: 16px;
+  height: 10px;
+  background: rgba(184, 184, 184, 0.4);
+  border-radius: 2px;
+}
+
+/* ============================================
+   PAIRS SECTION
+   ============================================ */
+.pairsSection {
+  margin-top: var(--space-xl);
+}
+
+.pairsTitle {
+  margin: 0 0 var(--space-md) 0;
+  font-family: var(--font-display);
+  font-weight: var(--weight-regular);
+  font-size: var(--text-h3);
+  color: var(--color-text);
+}

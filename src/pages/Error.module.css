@@ -1,0 +1,31 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-3xl) var(--space-lg);
+  text-align: center;
+}
+
+.image {
+  max-width: 300px;
+  width: 100%;
+  height: auto;
+  margin-bottom: var(--space-xl);
+  opacity: 0.9;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-bold);
+  color: var(--color-text);
+  margin: 0 0 var(--space-md) 0;
+}
+
+.message {
+  font-size: var(--text-base);
+  color: var(--color-text-muted);
+  margin: 0;
+  max-width: 400px;
+}

@@ -1,0 +1,187 @@
+/* ============================================
+   ABILITY ICON
+   ============================================ */
+.icon {
+  position: relative;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  line-height: 0;
+}
+
+.link:hover .icon {
+  border-color: var(--color-accent);
+  box-shadow: var(--glow-accent);
+  transform: scale(1.1);
+}
+
+/* Sizes */
+.xs {
+  width: 18px;
+  height: 18px;
+}
+
+.sm {
+  width: 28px;
+  height: 28px;
+}
+
+.md {
+  width: 40px;
+  height: 40px;
+}
+
+.lg {
+  width: 64px;
+  height: 64px;
+}
+
+/* ============================================
+   IMAGE
+   ============================================ */
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: var(--weight-bold);
+  font-size: var(--text-caption);
+  color: var(--color-text-muted);
+  background: var(--color-bg-surface);
+}
+
+/* ============================================
+   ULTIMATE INDICATOR
+   ============================================ */
+.ultimate {
+  border-color: var(--color-accent2);
+}
+
+.ultimateBadge {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 6px;
+  height: 6px;
+  background: var(--color-accent2);
+  border-radius: 50%;
+  box-shadow: 0 0 4px var(--color-accent2);
+}
+
+.xs .ultimateBadge {
+  width: 3px;
+  height: 3px;
+  bottom: 1px;
+  right: 1px;
+}
+
+.sm .ultimateBadge {
+  width: 4px;
+  height: 4px;
+  bottom: 1px;
+  right: 1px;
+}
+
+.lg .ultimateBadge {
+  width: 8px;
+  height: 8px;
+  bottom: 3px;
+  right: 3px;
+}
+
+/* ============================================
+   TOOLTIP
+   ============================================ */
+.icon[data-tooltip] {
+  cursor: help;
+}
+
+.icon[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 8px;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: var(--text-caption);
+  font-weight: var(--weight-light);
+  color: var(--color-text);
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--transition-fast), visibility var(--transition-fast);
+  z-index: 100;
+  pointer-events: none;
+}
+
+.icon[data-tooltip]:hover::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* ============================================
+   INLINE
+   ============================================ */
+.inline {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.inlineIconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 43px; /* Matches hero mini width for alignment */
+  flex-shrink: 0;
+}
+
+.inlineName {
+  font-weight: var(--weight-regular);
+  color: var(--color-text);
+}
+
+.inlineUltimate {
+  color: var(--color-accent2);
+}
+
+.inlineLink {
+  text-decoration: none;
+}
+
+.inlineLink:hover .inlineName {
+  color: var(--color-accent-glow);
+  text-decoration: underline;
+}
+
+/* ============================================
+   ROW
+   ============================================ */
+.row {
+  display: flex;
+  gap: var(--space-xs);
+  flex-wrap: wrap;
+}

@@ -1,0 +1,429 @@
+/* ============================================
+   DATA TABLE WRAPPER
+   ============================================ */
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+/* ============================================
+   TOOLBAR
+   ============================================ */
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.searchBar {
+  position: relative;
+  flex: 1;
+  max-width: 320px;
+  min-width: 200px;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 0.5rem 2rem 0.5rem 2.25rem;
+  font-family: var(--font-body);
+  font-weight: var(--weight-light);
+  font-size: var(--text-body);
+  color: var(--color-text);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.searchInput::placeholder {
+  color: var(--color-text-muted);
+}
+
+.searchInput:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px rgba(45, 212, 191, 0.15);
+}
+
+.searchClear {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  padding: 2px;
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+.searchClear:hover {
+  color: var(--color-text);
+  background: var(--color-border);
+}
+
+.searchClear svg {
+  width: 100%;
+  height: 100%;
+}
+
+.searchInputSkeleton {
+  height: 36px;
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  animation: shimmer 1.5s infinite;
+  background: linear-gradient(
+    90deg,
+    var(--color-bg-surface) 25%,
+    var(--color-border) 50%,
+    var(--color-bg-surface) 75%
+  );
+  background-size: 200% 100%;
+}
+
+.stats {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+}
+
+.statCount {
+  font-family: var(--font-body);
+  font-weight: var(--weight-regular);
+  font-size: var(--text-body);
+  color: var(--color-accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.statLabel {
+  font-family: var(--font-body);
+  font-weight: var(--weight-light);
+  font-size: var(--text-caption);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.statSep {
+  color: var(--color-border);
+  margin: 0 0.25rem;
+}
+
+/* ============================================
+   TABLE CONTAINER
+   ============================================ */
+.tableContainer {
+  overflow: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-elevated);
+}
+
+/* ============================================
+   TABLE
+   ============================================ */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  table-layout: fixed;
+}
+
+/* ============================================
+   HEADER
+   ============================================ */
+.thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+/* Ensure no gaps between sticky header rows */
+.thead tr {
+  background: var(--color-bg-surface);
+}
+
+.th {
+  padding: 0.75rem 1rem;
+  font-weight: var(--weight-light);
+  font-size: var(--text-body);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-text-muted);
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+  user-select: none;
+  background: var(--color-bg-surface);
+}
+
+/* Column group header row */
+.headerGroupRow .th {
+  padding: 0.5rem 1rem;
+  font-size: var(--text-caption);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+/* Group header cells (spanning multiple columns) */
+.thGroup {
+  background: var(--color-bg-elevated);
+}
+
+/* Center content in group headers */
+.thGroup .thContent {
+  justify-content: center;
+}
+
+/* Visual separator between column groups */
+.thBorderLeft,
+.tdBorderLeft {
+  border-left: 2px solid var(--color-accent);
+  position: relative;
+  z-index: 1;
+}
+
+.th:first-child {
+  padding-left: 1.25rem;
+}
+
+.th:last-child {
+  padding-right: 1.25rem;
+}
+
+.thSortable {
+  cursor: pointer;
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+.thSortable:hover {
+  color: var(--color-text);
+  background: var(--color-bg-elevated);
+}
+
+.thSorted {
+  color: var(--color-accent-glow);
+}
+
+.thContent {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.sortIcon {
+  display: flex;
+  align-items: center;
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.sortIcon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.sortIconIdle {
+  opacity: 0.3;
+}
+
+/* ============================================
+   ROWS
+   ============================================ */
+.tr {
+  transition: background var(--transition-fast);
+}
+
+.tr:hover {
+  background: var(--color-bg-surface);
+}
+
+.trClickable {
+  cursor: pointer;
+}
+
+.trClickable:hover {
+  background: rgba(45, 212, 191, 0.05);
+}
+
+.trClickable:active {
+  background: rgba(45, 212, 191, 0.1);
+}
+
+/* ============================================
+   CELLS
+   ============================================ */
+.td {
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid var(--color-border-subtle);
+  font-weight: var(--weight-light);
+  color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.td:first-child {
+  padding-left: 1.25rem;
+}
+
+.td:last-child {
+  padding-right: 1.25rem;
+}
+
+/* Numeric cells - right aligned */
+.numericCell {
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+}
+
+/* Percent cells */
+.percentCell {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Delta cells */
+.deltaCell {
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--weight-regular);
+}
+
+/* Positive/Negative colors */
+.positive {
+  color: var(--color-positive);
+}
+
+.negative {
+  color: var(--color-negative);
+}
+
+/* Muted text */
+.textMuted {
+  color: var(--color-text-muted);
+}
+
+/* Gradient cells */
+.gradientCell {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--weight-regular);
+  color: var(--color-text);
+  min-width: 52px;
+  text-align: center;
+}
+
+.gradientBarCell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 70px;
+}
+
+.gradientBar {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 24px;
+  border-radius: var(--radius-sm);
+  transition: width var(--transition-fast);
+}
+
+.gradientBarValue {
+  position: relative;
+  z-index: 1;
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--weight-regular);
+}
+
+/* ============================================
+   EMPTY STATE
+   ============================================ */
+.empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xl) var(--space-md);
+  color: var(--color-text-muted);
+  font-size: var(--text-body);
+}
+
+/* ============================================
+   SKELETON LOADING
+   ============================================ */
+.skeletonText {
+  height: 14px;
+  background: linear-gradient(
+    90deg,
+    var(--color-border-subtle) 25%,
+    var(--color-border) 50%,
+    var(--color-border-subtle) 75%
+  );
+  background-size: 200% 100%;
+  border-radius: var(--radius-sm);
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 640px) {
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .searchBar {
+    max-width: none;
+  }
+
+  .stats {
+    justify-content: flex-end;
+  }
+
+  .th,
+  .td {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .th:first-child,
+  .td:first-child {
+    padding-left: 0.75rem;
+  }
+
+  .th:last-child,
+  .td:last-child {
+    padding-right: 0.75rem;
+  }
+}

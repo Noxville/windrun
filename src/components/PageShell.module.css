@@ -1,0 +1,182 @@
+/* ============================================
+   PAGE SHELL
+   ============================================ */
+.shell {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: hidden;
+  animation: pageEnter 0.5s ease both;
+}
+
+.shellCompact .header {
+  margin-bottom: var(--space-md);
+}
+
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================
+   HEADER
+   ============================================ */
+.header {
+  flex-shrink: 0;
+  margin-bottom: var(--space-md);
+}
+
+/* ============================================
+   BREADCRUMBS
+   ============================================ */
+.breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: var(--space-sm);
+  animation: fadeIn 0.3s ease both;
+  animation-delay: 0.1s;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.crumb {
+  display: inline-flex;
+  align-items: center;
+}
+
+.crumbSep {
+  color: var(--color-border);
+  margin: 0 0.5rem;
+  font-size: var(--text-caption);
+}
+
+.crumbLink {
+  font-family: var(--font-body);
+  font-weight: var(--weight-light);
+  font-size: var(--text-caption);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.crumbLink:hover {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+.crumbCurrent {
+  font-family: var(--font-body);
+  font-weight: var(--weight-light);
+  font-size: var(--text-caption);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-text);
+}
+
+/* ============================================
+   TITLE
+   ============================================ */
+.titleRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.titleGroup {
+  animation: titleEnter 0.5s ease both;
+  animation-delay: 0.15s;
+}
+
+@keyframes titleEnter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.title {
+  font-family: var(--font-display);
+  font-weight: var(--weight-black);
+  font-size: clamp(2rem, 5vw, var(--text-display));
+  line-height: 1;
+  color: var(--color-accent-glow);
+  text-shadow: var(--glow-accent);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  font-family: var(--font-body);
+  font-weight: var(--weight-light);
+  font-size: var(--text-body);
+  color: var(--color-text-muted);
+  margin-top: var(--space-xs);
+  letter-spacing: 0.02em;
+}
+
+/* ============================================
+   ACTIONS
+   ============================================ */
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  animation: fadeIn 0.4s ease both;
+  animation-delay: 0.25s;
+}
+
+/* ============================================
+   CONTENT
+   ============================================ */
+.content {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-y: auto;
+  animation: contentEnter 0.5s ease both;
+  animation-delay: 0.2s;
+}
+
+@keyframes contentEnter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 640px) {
+  .titleRow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}

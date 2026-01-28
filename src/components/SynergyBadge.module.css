@@ -1,0 +1,111 @@
+/* ============================================
+   SYNERGY BADGE
+   ============================================ */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-body);
+  font-weight: var(--weight-light);
+  font-variant-numeric: tabular-nums;
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+  transition: transform var(--transition-fast);
+}
+
+.badge:hover {
+  transform: scale(1.05);
+}
+
+/* Sizes */
+.sm {
+  font-size: var(--text-micro);
+  padding: 2px 6px;
+  letter-spacing: 0.02em;
+}
+
+.md {
+  font-size: var(--text-caption);
+  padding: 4px 10px;
+  letter-spacing: 0.03em;
+}
+
+/* Variants */
+.positive {
+  background: color-mix(in srgb, var(--color-positive) 15%, transparent);
+  color: var(--color-positive);
+  border: 1px solid color-mix(in srgb, var(--color-positive) 30%, transparent);
+}
+
+.negative {
+  background: color-mix(in srgb, var(--color-negative) 15%, transparent);
+  color: var(--color-negative);
+  border: 1px solid color-mix(in srgb, var(--color-negative) 30%, transparent);
+}
+
+.neutral {
+  background: color-mix(in srgb, var(--color-text-muted) 10%, transparent);
+  color: var(--color-text-muted);
+  border: 1px solid color-mix(in srgb, var(--color-text-muted) 20%, transparent);
+}
+
+/* ============================================
+   SYNERGY BAR
+   ============================================ */
+.barContainer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  min-width: 120px;
+}
+
+.barTrack {
+  flex: 1;
+  height: 6px;
+  background: var(--color-bg-surface);
+  border-radius: var(--radius-full);
+  position: relative;
+  overflow: hidden;
+}
+
+.barCenter {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--color-border);
+}
+
+.barFill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: var(--radius-full);
+  transition: width var(--transition-normal);
+}
+
+.barPositive {
+  background: linear-gradient(90deg, var(--color-positive), color-mix(in srgb, var(--color-positive) 70%, white));
+}
+
+.barNegative {
+  background: linear-gradient(270deg, var(--color-negative), color-mix(in srgb, var(--color-negative) 70%, white));
+}
+
+.barLabel {
+  font-family: var(--font-body);
+  font-size: var(--text-caption);
+  font-weight: var(--weight-light);
+  font-variant-numeric: tabular-nums;
+  min-width: 45px;
+  text-align: right;
+}
+
+.barLabel.positive {
+  color: var(--color-positive);
+}
+
+.barLabel.negative {
+  color: var(--color-negative);
+}

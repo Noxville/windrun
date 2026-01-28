@@ -1,0 +1,17 @@
+.facetCell {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.facetIcon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  border-radius: var(--radius-sm);
+}
+
+.facetName {
+  color: var(--color-text);
+  font-weight: 500;
+}

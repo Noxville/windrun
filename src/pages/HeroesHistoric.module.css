@@ -1,0 +1,140 @@
+/* ============================================
+   CHART CONTAINER
+   ============================================ */
+.chartContainer {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: visible;
+}
+
+.chart {
+  display: block;
+}
+
+/* ============================================
+   CHART ELEMENTS
+   ============================================ */
+.heroLine {
+  fill: none;
+  stroke-width: 3;
+  opacity: 0.5;
+  cursor: pointer;
+  transition: opacity 0.2s, stroke-width 0.2s;
+  pointer-events: stroke;
+}
+
+.heroLine:hover,
+.heroLine.highlighted {
+  opacity: 1;
+  stroke-width: 5;
+}
+
+.heroLine.dimmed {
+  opacity: 0.08;
+}
+
+.heroPoint {
+  cursor: pointer;
+  transition: opacity 0.2s;
+  pointer-events: all;
+  opacity: 0.85;
+}
+
+.heroPoint.dimmed {
+  opacity: 0.15;
+}
+
+.heroPoint.highlighted {
+  opacity: 1;
+}
+
+.heroImage {
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.heroImage:hover {
+  transform: scale(1.1);
+}
+
+.heroImage.dimmedImage {
+  opacity: 0.2;
+}
+
+.rankBand {
+  pointer-events: none;
+}
+
+.rankLabel {
+  font-family: monospace;
+  pointer-events: none;
+}
+
+/* ============================================
+   AXES
+   ============================================ */
+.xAxis text {
+  fill: #ccc;
+  font-size: 11px;
+}
+
+.xAxis line,
+.xAxis path {
+  stroke: #555;
+}
+
+.grid line {
+  stroke: #333;
+  stroke-opacity: 0.7;
+}
+
+.grid path {
+  stroke-width: 0;
+}
+
+/* ============================================
+   TOOLTIP
+   ============================================ */
+.tooltip {
+  display: none;
+  position: fixed;
+  z-index: 2147483647;
+  background: var(--color-bg-elevated);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  color: var(--color-text);
+  font-size: var(--text-body);
+  font-family: var(--font-body);
+  pointer-events: none;
+  max-width: 280px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.tooltipHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 8px;
+}
+
+.tooltipHeader span {
+  font-weight: var(--weight-bold);
+  font-size: var(--text-body);
+}
+
+.tooltipPatch {
+  margin-top: 4px;
+  font-weight: var(--weight-regular);
+  color: var(--color-accent2);
+}
+
+.tooltipStat {
+  margin-top: 2px;
+  margin-left: 10px;
+  color: var(--color-text-muted);
+}
+
+.tooltipStat strong {
+  color: var(--color-text);
+}

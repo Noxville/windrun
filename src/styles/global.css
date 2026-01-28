@@ -1,0 +1,269 @@
+/* ============================================
+   WINDRUN THEME
+   Teal depths + cream/gold accents
+   ============================================ */
+:root {
+  /* Backgrounds */
+  --color-bg: #040d0d;
+  --color-bg-elevated: #081515;
+  --color-bg-surface: #0c1f1f;
+
+  /* Text */
+  --color-text: #e8f0f0;
+  --color-text-muted: #5a8a8a;
+
+  /* Accents */
+  --color-accent: #2dd4bf;
+  --color-accent-glow: #5eead4;
+  --color-accent-dim: #1a9a8a;
+  --color-accent2: #d4c9a0;
+
+  /* Semantic - vibrant colors */
+  --color-positive: #22c55e;
+  --color-negative: #ef4444;
+  --color-warning: #f59e0b;
+
+  /* Borders */
+  --color-border: #1a3a3a;
+  --color-border-subtle: #122828;
+
+  /* Effects */
+  --glow-accent: 0 0 30px rgba(45, 212, 191, 0.25);
+  --glow-accent-strong: 0 0 40px rgba(45, 212, 191, 0.4);
+
+  /* Typography */
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-body: 'JetBrains Mono', monospace;
+
+  --weight-black: 900;
+  --weight-bold: 700;
+  --weight-regular: 400;
+  --weight-light: 200;
+
+  /* Type scale */
+  --text-display: 4rem;
+  --text-title: 1.5rem;
+  --text-body: 0.95rem;
+  --text-caption: 0.75rem;
+  --text-micro: 0.6rem;
+
+  /* Spacing */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 2rem;
+  --space-xl: 4rem;
+
+  /* Radii */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
+  --radius-full: 999px;
+
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.25s ease;
+  --transition-slow: 0.4s ease;
+}
+
+/* ============================================
+   RESET & BASE
+   ============================================ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: var(--font-body);
+  font-weight: var(--weight-light);
+  font-size: var(--text-body);
+  background: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.6;
+  letter-spacing: 0.01em;
+}
+
+/* ============================================
+   TYPOGRAPHY
+   ============================================ */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: var(--weight-black);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+h1 {
+  font-size: var(--text-display);
+  color: var(--color-accent-glow);
+  text-shadow: var(--glow-accent);
+}
+
+h2 {
+  font-size: var(--text-title);
+}
+
+a {
+  color: var(--color-accent);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--color-accent-glow);
+}
+
+/* ============================================
+   LAYOUT
+   ============================================ */
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.app-main {
+  flex: 1 1 0;
+  min-height: 0;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: var(--space-sm) var(--space-md);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-main.app-main-full {
+  max-width: none;
+}
+
+.app-main.app-main-wide {
+  max-width: 1600px;
+}
+
+.app-header {
+  background: var(--color-bg-elevated);
+  border-bottom: 1px solid var(--color-border);
+  padding: var(--space-sm) var(--space-md);
+  flex-shrink: 0;
+  z-index: 100;
+}
+
+.app-footer {
+  flex-shrink: 0;
+  background: var(--color-bg-elevated);
+  border-top: 1px solid var(--color-border);
+  padding: var(--space-sm) var(--space-md);
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: var(--text-caption);
+  letter-spacing: 0.05em;
+}
+
+/* ============================================
+   UTILITIES
+   ============================================ */
+.text-positive { color: var(--color-positive); }
+.text-negative { color: var(--color-negative); }
+.text-muted { color: var(--color-text-muted); }
+.text-accent { color: var(--color-accent); }
+.text-accent2 { color: var(--color-accent2); }
+
+.font-display { font-family: var(--font-display); }
+.font-mono { font-family: var(--font-body); }
+
+.weight-black { font-weight: var(--weight-black); }
+.weight-light { font-weight: var(--weight-light); }
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes glowPulse {
+  0%, 100% { text-shadow: var(--glow-accent); }
+  50% { text-shadow: var(--glow-accent-strong); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-fade-in {
+  animation: fadeIn var(--transition-normal) ease both;
+}
+
+.animate-fade-up {
+  animation: fadeUp 0.5s ease both;
+}
+
+/* Staggered children */
+.stagger-children > *:nth-child(1) { animation-delay: 0s; }
+.stagger-children > *:nth-child(2) { animation-delay: 0.05s; }
+.stagger-children > *:nth-child(3) { animation-delay: 0.1s; }
+.stagger-children > *:nth-child(4) { animation-delay: 0.15s; }
+.stagger-children > *:nth-child(5) { animation-delay: 0.2s; }
+.stagger-children > *:nth-child(6) { animation-delay: 0.25s; }
+.stagger-children > *:nth-child(7) { animation-delay: 0.3s; }
+.stagger-children > *:nth-child(8) { animation-delay: 0.35s; }
+
+/* ============================================
+   SCROLLBAR
+   ============================================ */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}
+
+/* ============================================
+   SELECTION
+   ============================================ */
+::selection {
+  background: var(--color-accent);
+  color: var(--color-bg);
+}

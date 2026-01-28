@@ -1,0 +1,245 @@
+/* ============================================
+   VIEW SELECTOR
+   ============================================ */
+.viewSelector {
+  display: flex;
+  gap: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.viewButton {
+  font-family: var(--font-body);
+  font-weight: var(--weight-light);
+  font-size: var(--text-caption);
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  background: transparent;
+  border: none;
+  padding: 0.35rem 0.75rem;
+  cursor: pointer;
+  transition:
+    color var(--transition-fast),
+    background var(--transition-fast);
+  white-space: nowrap;
+}
+
+.viewButton:hover {
+  color: var(--color-text);
+  background: rgba(45, 212, 191, 0.05);
+}
+
+.viewButtonActive {
+  color: var(--color-accent-glow);
+  background: rgba(45, 212, 191, 0.15);
+}
+
+/* ============================================
+   TABLE CONTAINER
+   ============================================ */
+.tableContainer {
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-body);
+  font-size: var(--text-caption);
+}
+
+/* ============================================
+   HEADER ROWS
+   ============================================ */
+.headerRow1 th {
+  background: var(--color-bg-surface);
+  padding: var(--space-sm) var(--space-xs);
+  text-align: center;
+  font-weight: var(--weight-regular);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--color-border);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.headerRow2 th {
+  background: var(--color-bg-elevated);
+  padding: var(--space-xs);
+  text-align: center;
+  font-weight: var(--weight-light);
+  font-size: var(--text-micro);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-text-muted);
+  border-bottom: 1px solid var(--color-border);
+  position: sticky;
+  top: 32px;
+  z-index: 19;
+}
+
+.sortable {
+  cursor: pointer;
+  user-select: none;
+  transition: color var(--transition-fast);
+}
+
+.sortable:hover {
+  color: var(--color-accent);
+}
+
+.sortIndicator {
+  margin-left: 2px;
+  font-size: 0.7em;
+  color: var(--color-accent);
+}
+
+/* ============================================
+   STICKY ABILITY COLUMN
+   ============================================ */
+.stickyCol {
+  position: sticky;
+  left: 0;
+  background: var(--color-bg-elevated);
+  z-index: 10;
+  min-width: 180px;
+  text-align: left;
+  padding-left: var(--space-sm);
+}
+
+.headerRow1 .stickyCol {
+  z-index: 30;
+}
+
+/* ============================================
+   ATTRIBUTE COLORS
+   ============================================ */
+.attrSTR {
+  color: #ef4444;
+  border-left: 2px solid #ef4444;
+}
+
+.attrAGI {
+  color: #22c55e;
+  border-left: 2px solid #22c55e;
+}
+
+.attrINT {
+  color: #3b82f6;
+  border-left: 2px solid #3b82f6;
+}
+
+.attrUNI {
+  color: #a855f7;
+  border-left: 2px solid #a855f7;
+}
+
+/* ============================================
+   ATTACK TYPE COLORS
+   ============================================ */
+.melee {
+  color: #f59e0b;
+  border-left: 2px solid #f59e0b;
+}
+
+.ranged {
+  color: #06b6d4;
+  border-left: 2px solid #06b6d4;
+}
+
+/* ============================================
+   DATA ROWS
+   ============================================ */
+.dataRow {
+  transition: background var(--transition-fast);
+}
+
+.dataRow:hover {
+  background: rgba(45, 212, 191, 0.05);
+}
+
+.dataRow:hover .stickyCol {
+  background: var(--color-bg-surface);
+}
+
+.dataRow td {
+  padding: var(--space-xs);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+/* ============================================
+   STAT CELLS
+   ============================================ */
+.statCell {
+  text-align: center;
+  font-family: var(--font-mono);
+}
+
+.avgPick {
+  color: var(--color-text-muted);
+}
+
+.pickPct {
+  color: var(--color-text-muted);
+  opacity: 0.8;
+}
+
+.noData {
+  text-align: center;
+  color: var(--color-text-muted);
+  opacity: 0.4;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.totalPicks {
+  text-align: center;
+  font-family: var(--font-mono);
+  color: var(--color-text-muted);
+}
+
+/* ============================================
+   SEARCH
+   ============================================ */
+.searchContainer {
+  margin-bottom: var(--space-sm);
+}
+
+.searchInput {
+  width: 100%;
+  max-width: 300px;
+  padding: var(--space-sm) var(--space-md);
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  color: var(--color-text);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.searchInput:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px rgba(45, 212, 191, 0.2);
+}
+
+.searchInput::placeholder {
+  color: var(--color-text-muted);
+}
+
+/* ============================================
+   ABILITY LINK
+   ============================================ */
+.abilityLink {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.abilityLink:hover {
+  text-decoration: none;
+}

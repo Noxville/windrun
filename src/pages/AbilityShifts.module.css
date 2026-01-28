@@ -1,0 +1,80 @@
+/* ============================================
+   ABILITY SHIFTS PAGE
+   ============================================ */
+
+.description {
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-lg);
+  line-height: 1.5;
+}
+
+.abilityCell {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.heroBodyName {
+  font-family: var(--font-body);
+  font-weight: var(--weight-light);
+  font-size: var(--text-body);
+  color: var(--color-text);
+}
+
+/* ============================================
+   SHIFT VALUE CELLS
+   ============================================ */
+
+.shiftCell {
+  display: inline-block;
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  min-width: 60px;
+  text-align: center;
+}
+
+.winrateCell {
+  display: inline-block;
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  min-width: 60px;
+  text-align: center;
+}
+
+/* ============================================
+   COLUMN HEADERS
+   ============================================ */
+
+.headerKill {
+  color: #f87171;
+}
+
+.headerDeath {
+  color: #94a3b8;
+}
+
+.headerKA {
+  color: #fb923c;
+}
+
+.headerGPM {
+  color: #fbbf24;
+}
+
+.headerXPM {
+  color: #a78bfa;
+}
+
+.headerDmg {
+  color: #f472b6;
+}
+
+.headerHeal {
+  color: #4ade80;
+}

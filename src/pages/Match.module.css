@@ -1,0 +1,1510 @@
+/* Make scrollbar on far right */
+:global(.app-main-wide) {
+  overflow-x: hidden;
+}
+
+.loading {
+  text-align: center;
+  padding: var(--space-xl);
+  color: var(--color-text-muted);
+}
+
+/* Compact Header */
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.headerDate {
+  font-size: var(--text-body);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text);
+}
+
+.headerInfo {
+  font-size: var(--text-caption);
+  color: var(--color-text-muted);
+}
+
+.headerSep {
+  color: var(--color-text-muted);
+  font-size: var(--text-caption);
+}
+
+.matchIdButton {
+  font-size: var(--text-caption);
+  color: var(--color-text-muted);
+  font-family: var(--font-mono, monospace);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.matchIdButton:hover {
+  background: var(--color-bg-elevated);
+  color: var(--color-accent);
+}
+
+.copiedBadge {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  background: var(--color-positive);
+  color: var(--color-bg);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+}
+
+.headerLinks {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  margin-left: auto;
+}
+
+.externalLink {
+  display: flex;
+  align-items: center;
+  padding: var(--space-xs);
+  border-radius: var(--radius-sm);
+  transition: background 0.2s ease;
+}
+
+.externalLink:hover {
+  background: var(--color-bg-elevated);
+}
+
+.externalIcon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+/* Team Header Row with Inline Stats */
+.teamHeaderRow {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto 1fr;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.teamStatsInline {
+  display: flex;
+  gap: 6px;
+}
+
+.teamStatsInline:first-of-type {
+  justify-content: flex-end;
+}
+
+.teamStatsInline:last-of-type {
+  justify-content: flex-start;
+}
+
+.teamStatInline {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  min-width: 70px;
+  transition: all 0.3s ease;
+}
+
+.teamStatVal {
+  font-family: var(--font-display);
+  font-weight: var(--weight-bold);
+  font-size: var(--text-caption);
+  color: var(--color-text);
+}
+
+.teamStatLbl {
+  font-size: 9px;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+}
+
+.teamStatInline.statHighlight {
+  background: var(--color-bg-elevated);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 8px rgba(45, 212, 191, 0.3);
+}
+
+.vsColumn {
+  padding: 0 var(--space-sm);
+}
+
+.vs {
+  font-family: var(--font-display);
+  font-weight: var(--weight-bold);
+  font-size: var(--text-body);
+  color: var(--color-text-muted);
+}
+
+/* Team Headers */
+.teamHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  width: 240px;
+}
+
+.teamHeader.radiant {
+  justify-content: flex-start;
+}
+
+.teamHeader.dire {
+  justify-content: flex-end;
+}
+
+.teamHeader.winnerTeam {
+  border-color: var(--color-positive);
+  box-shadow: 0 0 12px rgba(45, 212, 191, 0.2);
+}
+
+.teamName {
+  font-family: var(--font-display);
+  font-weight: var(--weight-bold);
+  font-size: var(--text-title);
+}
+
+.teamHeader.radiant .teamName {
+  color: var(--color-positive);
+}
+
+.teamHeader.dire .teamName {
+  color: var(--color-negative);
+}
+
+.winnerBadge {
+  font-size: var(--text-caption);
+  font-weight: var(--weight-bold);
+  color: var(--color-positive);
+  background: rgba(34, 197, 94, 0.15);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.teamScore {
+  font-family: var(--font-display);
+  font-weight: var(--weight-black);
+  font-size: var(--text-heading);
+  color: var(--color-text);
+  margin-left: auto;
+}
+
+.teamHeader.dire .teamScore {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+/* Teams Container */
+.teamsContainer {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+}
+
+.team {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+/* Player Card */
+.playerCard {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm) var(--space-xs);
+  transition: border-color 0.2s ease;
+  font-size: 1.15em; /* Increase base font size by 15% */
+  overflow: hidden;
+}
+
+.playerCard.winner {
+  border-color: var(--color-positive);
+}
+
+.playerCard:hover {
+  border-color: var(--color-accent);
+}
+
+/* Hero Block - Vertically stacked */
+.heroBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 56px;
+  flex-shrink: 0;
+}
+
+.heroIconLink {
+  display: flex;
+  line-height: 0;
+}
+
+.heroIcon {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+}
+
+.topXBadge {
+  font-size: 8px;
+  font-weight: var(--weight-bold);
+  color: var(--color-accent2);
+  background: rgba(212, 201, 160, 0.15);
+  padding: 1px 4px;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.rating {
+  font-family: var(--font-display);
+  font-weight: var(--weight-bold);
+  font-size: var(--text-caption);
+  color: var(--color-accent);
+}
+
+.gamesPlayed {
+  font-size: 10px;
+  color: var(--color-text-muted);
+}
+
+/* Main Content */
+.mainContent {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.playerCard.radiant .mainContent {
+  flex-direction: row;
+}
+
+.playerCard.dire .mainContent {
+  flex-direction: row-reverse;
+}
+
+/* Spacing adjustments */
+.heroBlock + .inGameStats,
+.inGameStats + .heroBlock {
+  margin-left: var(--space-xs);
+}
+
+.inGameStats + .itemGrid {
+  margin-left: var(--space-md);
+}
+
+.itemGrid + .inGameStats {
+  margin-left: var(--space-md);
+}
+
+.itemGrid + .abilities,
+.abilities + .itemGrid {
+  margin-left: var(--space-xs);
+}
+
+.abilities + .pairsList,
+.pairsList + .abilities {
+  margin-left: var(--space-xs);
+}
+
+/* In-game Stats */
+.inGameStats {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 65px;
+}
+
+.kda {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-family: var(--font-display);
+  font-weight: var(--weight-bold);
+  font-size: var(--text-body);
+}
+
+.kills {
+  color: var(--color-positive);
+}
+
+.deaths {
+  color: var(--color-negative);
+}
+
+.assists {
+  color: var(--color-text-muted);
+}
+
+.separator {
+  color: var(--color-text-muted);
+  font-weight: var(--weight-regular);
+}
+
+.statMini {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-xs);
+}
+
+.statLabel {
+  font-size: 10px;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+}
+
+.statValue {
+  font-family: var(--font-display);
+  font-weight: var(--weight-semibold);
+  font-size: 10px;
+  color: var(--color-text);
+}
+
+/* Item Grid - 2 columns x 3 rows, taller to match stats */
+.itemGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 3px;
+  min-width: 80px;
+  align-self: stretch;
+}
+
+.itemSlot {
+  width: 38px;
+  height: 28px;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.itemIcon {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.itemPlaceholder {
+  width: 100%;
+  height: 100%;
+  background: var(--color-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  color: var(--color-text-muted);
+}
+
+.itemEmpty {
+  width: 100%;
+  height: 100%;
+  background: var(--color-bg);
+  opacity: 0.5;
+}
+
+/* Abilities */
+.abilities {
+  display: flex;
+  gap: var(--space-xs);
+  flex: 1;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 64px;
+}
+
+.abilitySlot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-height: 64px;
+}
+
+.abilityWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.heroInnate {
+  position: relative;
+  display: flex;
+  align-items: center;
+  line-height: 0;
+}
+
+.innateIcon {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--color-accent2);
+}
+
+.pickOrder {
+  position: absolute;
+  bottom: -4px;
+  left: -4px;
+  width: 18px;
+  height: 18px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: var(--weight-bold);
+  color: var(--color-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Big Winrate Badge */
+.abilityWinrateBig {
+  font-size: 11px;
+  font-weight: var(--weight-bold);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  border: 1px solid;
+  text-align: center;
+  min-width: 45px;
+}
+
+/* Ability Pairs - Wider, no scrollbar */
+.pairsList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 145px;
+  flex-shrink: 0;
+}
+
+.playerCard.dire .pairsList {
+  /* No extra margins for dire */
+}
+
+.pairItem {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 5px;
+  background: var(--color-bg-elevated);
+  border-radius: var(--radius-sm);
+}
+
+.pairIcons {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.pairHeroLink {
+  display: flex;
+  align-items: center;
+  line-height: 0;
+}
+
+.pairHeroIcon {
+  width: 18px;
+  height: 18px;
+  border-radius: 2px;
+  object-fit: cover;
+  border: 1px solid var(--color-accent2);
+}
+
+.pairPlus {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.pairWinrate {
+  font-size: 12px;
+  font-weight: var(--weight-bold);
+  color: var(--color-text);
+  min-width: 33px;
+  text-align: right;
+}
+
+.pairSynergy {
+  font-size: 11px;
+  font-weight: var(--weight-semibold);
+  min-width: 38px;
+  text-align: right;
+}
+
+/* Draft Replay */
+.draftReplay {
+  margin-top: var(--space-lg);
+  padding: var(--space-md);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.draftTitle {
+  font-family: var(--font-display);
+  font-weight: var(--weight-bold);
+  font-size: var(--text-title);
+  color: var(--color-text);
+  margin-bottom: var(--space-md);
+  text-align: center;
+}
+
+/* 3-Panel Layout */
+.draftThreePanel {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-sm);
+}
+
+.draftPlayersPanel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.draftPanelTitle {
+  font-size: var(--text-caption);
+  font-weight: var(--weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-align: center;
+  margin-bottom: var(--space-xs);
+}
+
+.draftPanelTitle.radiantTitle {
+  color: var(--color-positive);
+}
+
+.draftPanelTitle.direTitle {
+  color: var(--color-negative);
+}
+
+.draftCenterPanel {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: var(--space-xs);
+  align-items: start;
+}
+
+/* Player Draft Row */
+.playerDraftRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: 4px;
+  background: var(--color-bg-elevated);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+}
+
+.playerDraftRow.radiant {
+  flex-direction: row;
+}
+
+.playerDraftRow.dire {
+  flex-direction: row-reverse;
+}
+
+/* Glow for the player who is picking next */
+.playerDraftRow.picking {
+  box-shadow: 0 0 12px 2px rgba(45, 212, 191, 0.4);
+  border-color: var(--color-accent);
+}
+
+.playerDraftRow.picking.radiant {
+  box-shadow: 0 0 12px 2px rgba(34, 197, 94, 0.4);
+  border-color: var(--color-positive);
+}
+
+.playerDraftRow.picking.dire {
+  box-shadow: 0 0 12px 2px rgba(239, 68, 68, 0.4);
+  border-color: var(--color-negative);
+}
+
+.playerNumber {
+  font-family: var(--font-display);
+  font-weight: var(--weight-black);
+  font-size: var(--text-body);
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.playerNumber.radiantNum {
+  background: rgba(34, 197, 94, 0.2);
+  color: var(--color-positive);
+}
+
+.playerNumber.direNum {
+  background: rgba(239, 68, 68, 0.2);
+  color: var(--color-negative);
+}
+
+.playerDraftContent {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.playerDraftSlots {
+  display: flex;
+  gap: var(--space-xs);
+  justify-content: center;
+}
+
+/* Player Synergy Suggestions */
+.playerSynergyRow {
+  display: flex;
+  gap: 4px;
+  margin-top: 6px;
+  padding-top: 4px;
+  align-items: center;
+  justify-content: center;
+  border-top: 1px dashed var(--color-border);
+  height: 30px;
+}
+
+.synergyLabel {
+  font-size: 9px;
+  font-weight: var(--weight-bold);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.synergyEmpty {
+  font-size: 10px;
+  color: var(--color-text-muted);
+}
+
+.synergyPick {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 4px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  color: inherit;
+}
+
+.synergyPick:hover {
+  border-color: var(--color-accent);
+}
+
+.synergyPickIcon {
+  width: 22px;
+  height: 22px;
+  border-radius: 3px;
+  object-fit: cover;
+  border: 1px solid var(--color-border);
+}
+
+.synergyPickIcon.ultimate {
+  border-color: var(--color-accent2);
+}
+
+.synergyPickSyn {
+  font-size: 10px;
+  font-weight: var(--weight-bold);
+  color: var(--color-positive);
+}
+
+.synergyPickWr {
+  font-size: 10px;
+  font-weight: var(--weight-bold);
+  color: var(--color-text);
+}
+
+.bestLabelSpaced {
+  margin-left: var(--space-xs);
+}
+
+/* Draft Ability Slot - consistent sizing */
+.draftAbilitySlot {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  text-decoration: none;
+}
+
+/* Filled slot with icon */
+.filledSlot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+a.filledSlot:hover .draftSlotIcon {
+  border-color: var(--color-accent);
+}
+
+.draftSlotIcon {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--color-border);
+  object-fit: cover;
+}
+
+.draftSlotIcon.ultimateIcon {
+  border-color: var(--color-accent2);
+}
+
+.draftPickOrder {
+  position: absolute;
+  bottom: -4px;
+  left: -4px;
+  width: 18px;
+  height: 18px;
+  font-size: 10px;
+  font-weight: var(--weight-bold);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text);
+  z-index: 1;
+}
+
+/* Empty slot - same size as filled slots */
+.emptySlot {
+  width: 52px;
+  height: 52px;
+  margin: 2px;
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.emptySlotLabel {
+  font-family: var(--font-display);
+  font-weight: var(--weight-black);
+  font-size: 14px;
+  display: flex;
+  gap: 1px;
+  letter-spacing: 0px;
+}
+
+/* Color coding for S, U, H letters - vivid colors */
+.labelS {
+  color: #5b8def; /* Vivid blue for spells */
+}
+
+.labelU {
+  color: #f5c542; /* Bright gold for ultimates */
+}
+
+.labelH {
+  color: #2dd4bf; /* Bright teal for heroes */
+}
+
+/* Pool Section */
+.poolSection {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-xs);
+}
+
+/* Colored pool section backgrounds */
+.poolUltimates {
+  background: rgba(245, 197, 66, 0.08);
+  border-color: rgba(245, 197, 66, 0.3);
+}
+
+.poolSpells {
+  background: rgba(91, 141, 239, 0.08);
+  border-color: rgba(91, 141, 239, 0.3);
+}
+
+.poolHeroes {
+  background: rgba(45, 212, 191, 0.08);
+  border-color: rgba(45, 212, 191, 0.3);
+}
+
+.poolTitle {
+  font-size: var(--text-caption);
+  font-weight: var(--weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--space-xs);
+  text-align: center;
+}
+
+/* Color coding for pool section titles - vivid colors */
+.poolTitleS {
+  color: #5b8def; /* Vivid blue for spells */
+}
+
+.poolTitleU {
+  color: #f5c542; /* Bright gold for ultimates */
+}
+
+.poolTitleH {
+  color: #2dd4bf; /* Bright teal for heroes */
+}
+
+.poolGrid {
+  display: grid;
+  gap: 4px;
+  justify-items: center;
+}
+
+/* Narrow pool grids (ultimates, heroes) - 2 columns */
+.poolGridNarrow {
+  grid-template-columns: repeat(2, 1fr);
+  min-width: 96px;
+}
+
+/* Wide pool grid (spells) - 6 columns */
+.poolGridWide {
+  grid-template-columns: repeat(6, 1fr);
+}
+
+/* Pool section sizing for narrow sections */
+.poolUltimates,
+.poolHeroes {
+  width: fit-content;
+}
+
+.poolSpells {
+  flex: 1;
+}
+
+.poolAbility {
+  transition: opacity 0.2s ease;
+  text-decoration: none;
+  display: block;
+}
+
+.poolAbility:hover .poolIcon {
+  border-color: var(--color-accent);
+}
+
+/* Pool icons - all same size (42px) */
+.poolIcon {
+  width: 42px;
+  height: 42px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+}
+
+.poolAbility.picked {
+  opacity: 0.25;
+  filter: grayscale(100%);
+}
+
+/* Dynamic Tables Section */
+.draftDynamicSection {
+  display: flex;
+  gap: var(--space-md);
+  margin-top: var(--space-md);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--color-border);
+}
+
+.draftTableContainer {
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.draftTableTitle {
+  font-family: var(--font-display);
+  font-weight: var(--weight-bold);
+  font-size: var(--text-caption);
+  color: var(--color-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: var(--space-sm);
+  background: var(--color-bg-surface);
+  border-bottom: 1px solid var(--color-border);
+  margin: 0;
+}
+
+.draftTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-caption);
+}
+
+.draftTable th {
+  padding: var(--space-xs) var(--space-sm);
+  text-align: left;
+  font-weight: var(--weight-light);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-text-muted);
+  background: var(--color-bg-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.draftTable td {
+  padding: var(--space-xs) var(--space-sm);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.draftTable tbody tr:hover {
+  background: var(--color-bg-surface);
+}
+
+.draftTableIcons {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.draftTableIcons a {
+  text-decoration: none;
+}
+
+.draftTableIcons a:hover .draftTableIcon {
+  border-color: var(--color-accent);
+}
+
+.draftTableIcon {
+  width: 24px;
+  height: 24px;
+  border-radius: 3px;
+  object-fit: cover;
+  border: 1px solid var(--color-border);
+}
+
+.draftTableIcon.ultimate {
+  border-color: var(--color-accent2);
+}
+
+.draftTablePlus {
+  font-size: 10px;
+  color: var(--color-text-muted);
+}
+
+.draftTableName {
+  font-size: 11px;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
+}
+
+.draftTableWinrate {
+  font-family: var(--font-display);
+  font-weight: var(--weight-bold);
+  color: var(--color-text);
+}
+
+.draftTableSynergy {
+  font-weight: var(--weight-semibold);
+}
+
+.draftTableSynergy.positive {
+  color: var(--color-positive);
+}
+
+.draftTableSynergy.negative {
+  color: var(--color-negative);
+}
+
+/* Highest Priority Section */
+.mostContendedSection {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) 0;
+  margin-top: var(--space-xs);
+  border-top: 1px solid var(--color-border);
+}
+
+.mostContendedLabel {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 9px;
+  font-weight: var(--weight-bold);
+  color: var(--color-accent2);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.helpIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 12px;
+  height: 12px;
+  font-size: 9px;
+  font-weight: var(--weight-bold);
+  color: var(--color-text-muted);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  cursor: help;
+}
+
+.mostContendedList {
+  display: flex;
+  gap: 4px;
+}
+
+.contendedItem {
+  display: flex;
+  align-items: center;
+  padding: 2px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-accent2);
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+}
+
+.contendedItem:hover {
+  border-color: var(--color-accent);
+}
+
+.contendedIcon {
+  width: 34px;
+  height: 34px;
+  border-radius: 3px;
+  object-fit: cover;
+  border: 1px solid var(--color-border);
+}
+
+.contendedIcon.ultimate {
+  border-color: var(--color-accent2);
+}
+
+/* Draft Controls inside pool container */
+.draftControlsInPool {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--color-border);
+}
+
+.draftButton {
+  padding: var(--space-sm) var(--space-lg);
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  font-size: var(--text-body);
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 70px;
+}
+
+.draftButton:hover:not(:disabled) {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  background: var(--color-bg-surface);
+}
+
+.draftButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.draftProgress {
+  font-size: var(--text-body);
+  color: var(--color-text);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  width: 200px;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.pickingTeam {
+  font-size: var(--text-caption);
+  font-weight: var(--weight-semibold);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+}
+
+.pickingTeam.radiant {
+  background: rgba(34, 197, 94, 0.15);
+  color: var(--color-positive);
+}
+
+.pickingTeam.dire {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--color-negative);
+}
+
+/* Pairs Mode Selector */
+.draftTableHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-sm);
+  background: var(--color-bg-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.draftTableHeader .draftTableTitle {
+  padding: 0;
+  background: none;
+  border: none;
+  margin: 0;
+}
+
+.pairsModeSelector {
+  display: flex;
+  gap: 2px;
+  background: var(--color-bg);
+  border-radius: var(--radius-sm);
+  padding: 2px;
+}
+
+.pairsModeBtn {
+  padding: 4px 8px;
+  font-size: 10px;
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-muted);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pairsModeBtn:hover {
+  color: var(--color-text);
+}
+
+.pairsModeBtnActive {
+  background: var(--color-accent);
+  color: var(--color-bg);
+}
+
+/* Narrow Tables */
+.narrowTable {
+  flex: 0 0 220px;
+  max-height: 400px;
+  display: flex;
+  flex-direction: column;
+}
+
+.narrowTable .draftTable {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* Role Analysis Table */
+.roleAnalysisTable {
+  flex: 1 1 auto;
+  max-height: 400px;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.roleAnalysisTable .draftTable {
+  flex: 1;
+  table-layout: fixed;
+}
+
+.roleAnalysisTable .draftTable th,
+.roleAnalysisTable .draftTable td {
+  width: auto;
+  padding: 2px 2px !important;
+  font-size: 10px;
+  height: 27px;
+  vertical-align: middle;
+}
+
+.roleAnalysisTable .draftTable th {
+  font-size: 9px;
+  white-space: nowrap;
+}
+
+.sortableHeader {
+  cursor: pointer;
+  user-select: none;
+  transition: background-color var(--transition-fast);
+}
+
+.sortableHeader:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.sortIndicator {
+  font-size: 8px;
+  margin-left: 2px;
+  color: var(--color-accent);
+}
+
+.roleColNum {
+  width: 28px !important;
+  min-width: 28px;
+  text-align: center;
+}
+
+.roleColAbilities {
+  width: 135px !important;
+  min-width: 135px;
+}
+
+.roleAbilityIcons {
+  display: flex;
+  gap: 2px;
+  height: 23px;
+  align-items: center;
+}
+
+.roleAbilityIcons a {
+  text-decoration: none;
+  display: flex;
+  line-height: 0;
+}
+
+.roleAbilityIcons a:hover .roleAbilityIcon {
+  border-color: var(--color-accent);
+}
+
+.roleAbilityIcon {
+  width: 23px;
+  height: 23px;
+  border-radius: 2px;
+  object-fit: cover;
+  border: 1px solid var(--color-border);
+}
+
+.roleAbilityIcon.ultimate {
+  border-color: var(--color-accent2);
+}
+
+.roleShiftCell {
+  font-family: var(--font-mono, monospace);
+  font-size: 10px;
+  text-align: center;
+  padding: 2px 2px !important;
+  white-space: nowrap;
+}
+
+.roleAghsCell {
+  font-family: var(--font-display);
+  font-weight: var(--weight-semibold);
+  font-size: 10px;
+  text-align: center;
+  padding: 2px 2px !important;
+  white-space: nowrap;
+}
+
+.radiantRow {
+  background: transparent;
+}
+
+.direRow {
+  background: transparent;
+}
+
+.radiantRow .radiantNum,
+.direRow .direNum {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  font-size: 10px;
+  font-weight: var(--weight-bold);
+  white-space: nowrap;
+}
+
+.radiantRow .radiantNum {
+  background: rgba(34, 197, 94, 0.2);
+  color: var(--color-positive);
+}
+
+.direRow .direNum {
+  background: rgba(239, 68, 68, 0.2);
+  color: var(--color-negative);
+}
+
+/* Role Analysis Header Colors */
+.headerKill {
+  color: #ef4444;
+}
+
+.headerDeath {
+  color: #a855f7;
+}
+
+.headerKA {
+  color: #f97316;
+}
+
+.headerGPM {
+  color: #eab308;
+}
+
+.headerXPM {
+  color: #3b82f6;
+}
+
+.headerDmg {
+  color: #ec4899;
+}
+
+.headerHeal {
+  color: #22c55e;
+}
+
+.headerScepter {
+  color: #60a5fa;
+}
+
+.headerShard {
+  color: #a78bfa;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .teamsContainer {
+    grid-template-columns: 1fr;
+  }
+
+  .playerCard.dire .mainContent {
+    flex-direction: row;
+  }
+
+  .teamHeaderRow {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .teamStatsInline:first-of-type,
+  .teamStatsInline:last-of-type {
+    justify-content: center;
+  }
+
+  .draftThreePanel {
+    grid-template-columns: 1fr;
+  }
+
+  .draftPlayersPanel:first-child {
+    order: 1;
+  }
+
+  .draftCenterPanel {
+    order: 3;
+  }
+
+  .draftPlayersPanel:last-child {
+    order: 2;
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    justify-content: center;
+  }
+
+  .headerLinks {
+    margin-left: 0;
+  }
+
+  .teamStatsInline {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .mainContent {
+    flex-wrap: wrap;
+  }
+
+  .abilities {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .pairsList {
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .playerDraftSlots {
+    flex-wrap: wrap;
+  }
+
+  .draftAbilitySlot {
+    width: 40px;
+    height: 40px;
+  }
+
+  .draftSlotIcon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .emptySlot {
+    width: 36px;
+    height: 36px;
+    margin: 2px;
+  }
+
+  .emptySlotLabel {
+    font-size: 10px;
+  }
+}

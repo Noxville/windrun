@@ -1,0 +1,127 @@
+/* ============================================
+   REGION SELECTOR
+   ============================================ */
+.regionSelector {
+  display: flex;
+  gap: var(--space-xs);
+  flex-wrap: wrap;
+}
+
+.regionButton {
+  font-family: var(--font-body);
+  font-weight: var(--weight-light);
+  font-size: var(--text-caption);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  padding: 0.35rem 0.75rem;
+  cursor: pointer;
+  transition:
+    color var(--transition-fast),
+    background var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.regionButton:hover {
+  color: var(--color-text);
+  border-color: var(--color-accent);
+}
+
+.regionButtonActive {
+  color: var(--color-accent-glow);
+  background: rgba(45, 212, 191, 0.1);
+  border-color: var(--color-accent);
+}
+
+/* ============================================
+   TABLE CELLS
+   ============================================ */
+.rank {
+  font-family: var(--font-body);
+  font-weight: var(--weight-regular);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+}
+
+.topRank {
+  font-family: var(--font-display);
+  font-weight: var(--weight-bold);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-accent2);
+}
+
+.playerCell {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.playerName {
+  font-weight: var(--weight-regular);
+  color: var(--color-text);
+}
+
+.globalRank {
+  font-family: var(--font-body);
+  font-weight: var(--weight-light);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+  opacity: 0.7;
+}
+
+.regionTag {
+  font-family: var(--font-body);
+  font-weight: var(--weight-regular);
+  font-size: var(--text-caption);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-text-muted);
+}
+
+/* ============================================
+   EXTERNAL LINKS
+   ============================================ */
+.linksCell {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.externalLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  background: transparent;
+  transition:
+    color var(--transition-fast),
+    background var(--transition-fast);
+}
+
+.externalLink:hover {
+  color: var(--color-accent);
+  background: rgba(45, 212, 191, 0.1);
+}
+
+.externalIcon {
+  display: block;
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}

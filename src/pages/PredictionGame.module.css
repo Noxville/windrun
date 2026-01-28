@@ -1,0 +1,92 @@
+/* ============================================
+   PREDICTION GAME
+   ============================================ */
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-xl) var(--space-md);
+}
+
+.loginPrompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 400px;
+}
+
+.promptTitle {
+  font-family: var(--font-display);
+  font-weight: var(--weight-bold);
+  font-size: var(--text-title);
+  color: var(--color-text);
+  margin-bottom: var(--space-md);
+}
+
+.promptText {
+  font-family: var(--font-body);
+  font-weight: var(--weight-light);
+  font-size: var(--text-body);
+  color: var(--color-text-muted);
+  line-height: 1.6;
+  margin-bottom: var(--space-lg);
+}
+
+.loginButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.5rem;
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-full);
+  color: var(--color-accent);
+  font-family: var(--font-body);
+  font-weight: var(--weight-regular);
+  font-size: var(--text-body);
+  cursor: pointer;
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.loginButton:hover {
+  background: var(--color-accent);
+  color: var(--color-bg);
+  box-shadow: var(--glow-accent);
+}
+
+.steamIcon {
+  width: 24px;
+  height: 24px;
+}
+
+.gameArea {
+  width: 100%;
+  max-width: 800px;
+}
+
+.welcomeMessage {
+  text-align: center;
+  padding: var(--space-xl);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.welcomeMessage h2 {
+  font-family: var(--font-display);
+  font-weight: var(--weight-bold);
+  font-size: var(--text-title);
+  color: var(--color-accent-glow);
+  margin-bottom: var(--space-md);
+}
+
+.comingSoon {
+  font-family: var(--font-body);
+  font-weight: var(--weight-light);
+  font-size: var(--text-body);
+  color: var(--color-text-muted);
+}
