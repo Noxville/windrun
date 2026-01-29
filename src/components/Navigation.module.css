@@ -199,6 +199,27 @@
   gap: var(--space-sm);
 }
 
+.userLink {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  text-decoration: none;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast);
+}
+
+.userLink:hover {
+  background: var(--color-bg-surface);
+}
+
+.userAvatar {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+}
+
 .userName {
   font-family: var(--font-body);
   font-size: var(--text-caption);
@@ -206,9 +227,51 @@
   text-decoration: none;
 }
 
-.userName:hover {
+.userLink:hover .userName {
   color: var(--color-text);
-  text-decoration: underline;
+}
+
+.logoutButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.6rem;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.logoutButton:hover {
+  background: var(--color-bg-surface);
+  border-color: var(--color-negative);
+}
+
+.logoutButton:hover .steamIconSmall {
+  color: var(--color-negative);
+}
+
+.logoutButton:hover .logoutText {
+  color: var(--color-negative);
+}
+
+.steamIconSmall {
+  width: 14px;
+  height: 14px;
+  color: var(--color-text-muted);
+  transition: color var(--transition-fast);
+}
+
+.logoutText {
+  font-family: var(--font-body);
+  font-weight: var(--weight-light);
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  letter-spacing: 0.02em;
+  transition: color var(--transition-fast);
 }
 
 .authButton {

@@ -17,6 +17,7 @@
 
 import { useQuery } from '@tanstack/react-query'
 import { apiFetch, ApiError } from './client'
+import type { PlayerProfile, PlayerMatch, PlayerStats } from '../types'
 
 function retryOn503(failureCount: number, error: Error): boolean {
   if (error instanceof ApiError && error.status === 503) {
@@ -66,7 +67,7 @@ export function useMatchMeta(matchId: string) {
 }
 
 export function usePlayerData(playerId: string) {
-  return useQuery({
+  return useQuery<{ data: PlayerProfile }>({
     queryKey: ['player', playerId],
     queryFn: () => apiFetch(`/api/v2/players/${playerId}`),
     staleTime: 60 * 1000,
@@ -74,7 +75,7 @@ export function usePlayerData(playerId: string) {
 }
 
 export function usePlayerMatches(playerId: string, page: number = 0) {
-  return useQuery({
+  return useQuery<PlayerMatch[]>({
     queryKey: ['player-matches', playerId, page],
     queryFn: () => apiFetch(`/api/v2/players/${playerId}/matches?page=${page}`),
     staleTime: 60 * 1000,
@@ -82,7 +83,7 @@ export function usePlayerMatches(playerId: string, page: number = 0) {
 }
 
 export function usePlayerStats(playerId: string) {
-  return useQuery({
+  return useQuery<{ stats: PlayerStats }>({
     queryKey: ['player-stats', playerId],
     queryFn: () => apiFetch(`/api/v2/players/${playerId}/stats`),
     staleTime: 60 * 1000,

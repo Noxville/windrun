@@ -15,8 +15,10 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-// Use production API by default, can be overridden via environment variable
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'https://api.windrun.io'
+// In development, use empty string to leverage Vite's proxy (see vite.config.ts)
+// In production, use the full API URL
+const isDev = import.meta.env.DEV
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? (isDev ? '' : 'https://api.windrun.io')
 
 export const CDN_BASE = 'https://cdn.datdota.com/images'
 

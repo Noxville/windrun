@@ -39,11 +39,12 @@ const NAV_ITEMS: NavItem[] = [
       { label: 'Distribution', href: '/player-distribution', description: 'Rating distribution' },
     ],
   },
-  {
-    label: 'Game',
-    href: '#',
-    onClick: () => alert('todo'),
-  },
+  // Game link hidden for now
+  // {
+  //   label: 'Game',
+  //   href: '#',
+  //   onClick: () => alert('todo'),
+  // },
   {
     label: 'About',
     href: '/about',
@@ -52,7 +53,7 @@ const NAV_ITEMS: NavItem[] = [
 
 export function Navigation() {
   const location = useLocation()
-  const { user, isLoading, logout } = useAuth()
+  const { user, isLoading, login, logout } = useAuth()
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)
   const [mobileOpen, setMobileOpen] = useState(false)
   const navRef = useRef<HTMLElement>(null)
@@ -155,15 +156,19 @@ export function Navigation() {
           <span className={styles.authLoading}>...</span>
         ) : user ? (
           <div className={styles.userMenu}>
-            <Link to={`/players/${user.id}`} className={styles.userName}>
-              {user.name}
+            <Link to={`/players/${user.id}`} className={styles.userLink}>
+              <img src={user.avatar} alt="" className={styles.userAvatar} />
+              <span className={styles.userName}>{user.name}</span>
             </Link>
-            <button onClick={logout} className={styles.authButton}>
-              Logout
+            <button onClick={logout} className={styles.logoutButton} title="Sign out">
+              <svg className={styles.steamIconSmall} viewBox="0 0 32 32" fill="currentColor">
+                <path d="M15.974 0C7.596 0 .765 6.464.042 14.681l8.583 3.543a4.52 4.52 0 0 1 2.55-.786c.085 0 .17.003.253.008l3.82-5.531v-.078c0-3.322 2.703-6.025 6.025-6.025s6.025 2.703 6.025 6.025-2.703 6.025-6.025 6.025h-.14l-5.446 3.886c0 .07.004.14.004.211 0 2.493-2.027 4.52-4.52 4.52a4.525 4.525 0 0 1-4.476-3.903L.633 19.971C2.35 27.076 8.548 32.2 15.974 32.2c8.837 0 16-7.163 16-16s-7.163-16-16-16zm-5.01 24.692l-1.946-.803a3.393 3.393 0 0 0 3.134 2.087 3.393 3.393 0 0 0 3.389-3.39 3.393 3.393 0 0 0-3.39-3.388c-.573 0-1.112.145-1.585.399l2.01.83a2.5 2.5 0 0 1-1.612 4.265zm10.31-12.855a4.016 4.016 0 0 0-4.012-4.012 4.016 4.016 0 0 0-4.012 4.012 4.016 4.016 0 0 0 4.012 4.012 4.016 4.016 0 0 0 4.012-4.012zm-7.019 0a3.01 3.01 0 0 1 3.007-3.007 3.01 3.01 0 0 1 3.008 3.007 3.01 3.01 0 0 1-3.008 3.008 3.01 3.01 0 0 1-3.007-3.008z"/>
+              </svg>
+              <span className={styles.logoutText}>Sign out</span>
             </button>
           </div>
         ) : (
-          <button onClick={() => alert('todo')} className={styles.steamButton}>
+          <button onClick={login} className={styles.steamButton}>
             <svg className={styles.steamIcon} viewBox="0 0 32 32" fill="currentColor">
               <path d="M15.974 0C7.596 0 .765 6.464.042 14.681l8.583 3.543a4.52 4.52 0 0 1 2.55-.786c.085 0 .17.003.253.008l3.82-5.531v-.078c0-3.322 2.703-6.025 6.025-6.025s6.025 2.703 6.025 6.025-2.703 6.025-6.025 6.025h-.14l-5.446 3.886c0 .07.004.14.004.211 0 2.493-2.027 4.52-4.52 4.52a4.525 4.525 0 0 1-4.476-3.903L.633 19.971C2.35 27.076 8.548 32.2 15.974 32.2c8.837 0 16-7.163 16-16s-7.163-16-16-16zm-5.01 24.692l-1.946-.803a3.393 3.393 0 0 0 3.134 2.087 3.393 3.393 0 0 0 3.389-3.39 3.393 3.393 0 0 0-3.39-3.388c-.573 0-1.112.145-1.585.399l2.01.83a2.5 2.5 0 0 1-1.612 4.265zm10.31-12.855a4.016 4.016 0 0 0-4.012-4.012 4.016 4.016 0 0 0-4.012 4.012 4.016 4.016 0 0 0 4.012 4.012 4.016 4.016 0 0 0 4.012-4.012zm-7.019 0a3.01 3.01 0 0 1 3.007-3.007 3.01 3.01 0 0 1 3.008 3.007 3.01 3.01 0 0 1-3.008 3.008 3.01 3.01 0 0 1-3.007-3.008z"/>
             </svg>

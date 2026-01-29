@@ -16,9 +16,11 @@
  */
 
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { API_BASE_URL } from '../config'
 
-interface User {
+// Full URL needed for browser redirects (login/logout)
+const AUTH_BASE_URL = 'https://api.windrun.io'
+
+export interface User {
   id: number
   name: string
   avatar: string
@@ -28,15 +30,19 @@ export function useCurrentUser() {
   return useQuery<User | null>({
     queryKey: ['user'],
     queryFn: async () => {
-      // TODO: Enable when /user/verify endpoint is implemented
-      // try {
-      //   return await apiFetch<User>('/user/verify')
-      // } catch {
-      //   return null
-      // }
-      return null
+      const url = `${AUTH_BASE_URL}/api/v2/user/me`
+      try {
+        const response = await fetch(url, { credentials: 'include' })
+        if (!response.ok) {
+          return null
+        }
+        return await response.json()
+      } catch {
+        return null
+      }
     },
     staleTime: 5 * 60 * 1000,
+    retry: false,
   })
 }
 
@@ -46,13 +52,13 @@ export function useAuth() {
 
   const login = () => {
     const returnUrl = encodeURIComponent(window.location.href)
-    window.location.href = `${API_BASE_URL}/user/login?returnUrl=${returnUrl}`
+    window.location.href = `${AUTH_BASE_URL}/user/login?returnUrl=${returnUrl}`
   }
 
   const logout = () => {
     const returnUrl = encodeURIComponent(window.location.origin)
     queryClient.setQueryData(['user'], null)
-    window.location.href = `${API_BASE_URL}/user/logout?returnUrl=${returnUrl}`
+    window.location.href = `${AUTH_BASE_URL}/user/logout?returnUrl=${returnUrl}`
   }
 
   return { user, isLoading, login, logout }

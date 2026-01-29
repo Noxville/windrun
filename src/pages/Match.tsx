@@ -1,5 +1,5 @@
 import { useMemo, useLayoutEffect, useState, useCallback } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 import { PageShell } from '../components/PageShell'
 import { AbilityIcon } from '../components'
 import { usePersistedQuery } from '../api'
@@ -257,9 +257,10 @@ interface PlayerCardProps {
   pickOrderMap: Map<number, number>
   abilityWinrates: Map<number, number>
   abilityPairs: Map<string, { winrate: number; numPicks: number }>
+  simple?: boolean
 }
 
-function PlayerCard({ player, isWinner, side, pickOrderMap, abilityWinrates, abilityPairs }: PlayerCardProps) {
+function PlayerCard({ player, isWinner, side, pickOrderMap, abilityWinrates, abilityPairs, simple = false }: PlayerCardProps) {
   const hero = getHeroById(player.hero)
   const topXLabel = getTopXLabel(player.topX)
 
@@ -289,6 +290,15 @@ function PlayerCard({ player, isWinner, side, pickOrderMap, abilityWinrates, abi
       winrate: winrate ?? null,
     }
   })
+
+  // Calculate average pick position for simple view
+  const avgPickPos = useMemo(() => {
+    const picks = resolvedAbilities
+      .map(a => a.pickOrder)
+      .filter((p): p is number => p !== undefined && p !== null)
+    if (picks.length === 0) return null
+    return picks.reduce((sum, p) => sum + p, 0) / picks.length
+  }, [resolvedAbilities])
 
   const topPairs = useMemo(() => {
     // Include all ability pairs including hero innates (negative IDs)
@@ -458,7 +468,23 @@ function PlayerCard({ player, isWinner, side, pickOrderMap, abilityWinrates, abi
     </div>
   )
 
-  const heroBlock = (
+  const heroBlock = simple ? (
+    <div className={styles.heroBlockSimple}>
+      {hero && (
+        <a href={`/heroes/${player.hero}`} target="_blank" rel="noopener noreferrer" title={hero.englishName} className={styles.heroIconLink}>
+          <img
+            src={heroMiniUrl(hero.picture)}
+            alt={hero.englishName}
+            className={styles.heroIconSimple}
+          />
+        </a>
+      )}
+      <div className={styles.heroInfoSimple}>
+        {topXLabel && <span className={styles.topXBadgeSimple}>{topXLabel}</span>}
+        <span className={styles.ratingSimple}>{formatRating(player.rating)}</span>
+      </div>
+    </div>
+  ) : (
     <div className={styles.heroBlock}>
       {hero && (
         <a href={`/heroes/${player.hero}`} target="_blank" rel="noopener noreferrer" title={hero.englishName} className={styles.heroIconLink}>
@@ -474,6 +500,22 @@ function PlayerCard({ player, isWinner, side, pickOrderMap, abilityWinrates, abi
       <span className={styles.gamesPlayed}>
         {player.winLoss.total.toLocaleString()} games
       </span>
+    </div>
+  )
+
+  const simpleStatsContent = (
+    <div className={styles.simpleStats}>
+      <div className={styles.kda}>
+        <span className={styles.kills}>{player.kills}</span>
+        <span className={styles.separator}>/</span>
+        <span className={styles.deaths}>{player.deaths}</span>
+        <span className={styles.separator}>/</span>
+        <span className={styles.assists}>{player.assists}</span>
+      </div>
+      <div className={styles.avgPickStat}>
+        <span className={styles.avgPickLabel}>Avg Pick</span>
+        <span className={styles.avgPickValue}>{avgPickPos !== null ? avgPickPos.toFixed(1) : '—'}</span>
+      </div>
     </div>
   )
 
@@ -524,6 +566,18 @@ function PlayerCard({ player, isWinner, side, pickOrderMap, abilityWinrates, abi
     </div>
   )
 
+  if (simple) {
+    return (
+      <div className={`${styles.playerCard} ${styles.playerCardSimple} ${isWinner ? styles.winner : ''} ${styles[side]}`}>
+        <div className={styles.mainContent}>
+          {heroBlock}
+          {simpleStatsContent}
+          {abilitiesBlock}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className={`${styles.playerCard} ${isWinner ? styles.winner : ''} ${styles[side]}`}>
       <div className={styles.mainContent}>
@@ -543,6 +597,20 @@ export function MatchPage() {
   const { matchId } = useParams()
   const [copied, setCopied] = useState(false)
   const [hoveredStat, setHoveredStat] = useState<string | null>(null)
+  const [searchParams, setSearchParams] = useSearchParams()
+  const viewMode = (searchParams.get('view') === 'advanced' ? 'advanced' : 'simple') as 'simple' | 'advanced'
+
+  const setViewMode = useCallback((mode: 'simple' | 'advanced') => {
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev)
+      if (mode === 'simple') {
+        next.delete('view')
+      } else {
+        next.set('view', mode)
+      }
+      return next
+    })
+  }, [setSearchParams])
 
   const copyMatchId = useCallback(() => {
     if (matchId) {
@@ -753,26 +821,31 @@ export function MatchPage() {
         <button className={styles.matchIdButton} onClick={copyMatchId} title="Click to copy">
           #{matchId} {copied && <span className={styles.copiedBadge}>Copied!</span>}
         </button>
-        <div className={styles.headerLinks}>
-          <a
-            href={`https://www.dotabuff.com/matches/${matchId}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.externalLink}
-            title="View on Dotabuff"
-          >
-            <img src="https://www.dotabuff.com/favicon.ico" alt="Dotabuff" className={styles.externalIcon} />
-          </a>
-          <a
-            href={`https://www.opendota.com/matches/${matchId}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.externalLink}
-            title="View on OpenDota"
-          >
-            <img src="/opendota-icon.png" alt="OpenDota" className={styles.externalIcon} />
-          </a>
-        </div>
+        <span className={styles.headerSep}>•</span>
+        <a
+          href={`https://www.dotabuff.com/matches/${matchId}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles.externalLink}
+          title="View on Dotabuff"
+        >
+          <img src="https://www.dotabuff.com/favicon.ico" alt="Dotabuff" className={styles.externalIcon} />
+        </a>
+        <a
+          href={`https://www.opendota.com/matches/${matchId}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles.externalLink}
+          title="View on OpenDota"
+        >
+          <img src="/opendota-icon.png" alt="OpenDota" className={styles.externalIcon} />
+        </a>
+        <button
+          className={`${styles.advancedToggle} ${viewMode === 'advanced' ? styles.advancedToggleActive : ''}`}
+          onClick={() => setViewMode(viewMode === 'advanced' ? 'simple' : 'advanced')}
+        >
+          Advanced
+        </button>
       </div>
 
       {/* Team Headers with Inline Stats */}
@@ -888,47 +961,98 @@ export function MatchPage() {
         )}
       </div>
 
-      {/* Teams */}
-      <div className={styles.teamsContainer}>
-        <div className={styles.team}>
-          {fixedRadiant.map(player => (
-            <PlayerCard
-              key={player.steamId}
-              player={player}
-              isWinner={matchData.radiantWin}
-              side="radiant"
-              pickOrderMap={pickOrderMap}
-              abilityWinrates={abilityWinrates}
-              abilityPairs={abilityPairs}
-            />
-          ))}
-        </div>
-        <div className={styles.team}>
-          {fixedDire.map(player => (
-            <PlayerCard
-              key={player.steamId}
-              player={player}
-              isWinner={!matchData.radiantWin}
-              side="dire"
-              pickOrderMap={pickOrderMap}
-              abilityWinrates={abilityWinrates}
-              abilityPairs={abilityPairs}
-            />
-          ))}
-        </div>
-      </div>
+      {viewMode === 'advanced' ? (
+        <>
+          {/* Teams - Advanced View */}
+          <div className={styles.teamsContainer}>
+            <div className={styles.team}>
+              {fixedRadiant.map(player => (
+                <PlayerCard
+                  key={player.steamId}
+                  player={player}
+                  isWinner={matchData.radiantWin}
+                  side="radiant"
+                  pickOrderMap={pickOrderMap}
+                  abilityWinrates={abilityWinrates}
+                  abilityPairs={abilityPairs}
+                />
+              ))}
+            </div>
+            <div className={styles.team}>
+              {fixedDire.map(player => (
+                <PlayerCard
+                  key={player.steamId}
+                  player={player}
+                  isWinner={!matchData.radiantWin}
+                  side="dire"
+                  pickOrderMap={pickOrderMap}
+                  abilityWinrates={abilityWinrates}
+                  abilityPairs={abilityPairs}
+                />
+              ))}
+            </div>
+          </div>
 
-      {/* Draft Replay Section */}
-      <DraftReplay
-        picks={matchData.picks}
-        ignoredSpells={matchData.ignoredSpells}
-        radiantPlayers={fixedRadiant}
-        direPlayers={fixedDire}
-        abilityPairs={abilityPairs}
-        abilityWinrates={abilityWinrates}
-        abilityShifts={abilityShifts}
-        abilityAghs={abilityAghs}
-      />
+          {/* Draft Replay Section */}
+          <DraftReplay
+            picks={matchData.picks}
+            ignoredSpells={matchData.ignoredSpells}
+            radiantPlayers={fixedRadiant}
+            direPlayers={fixedDire}
+            abilityPairs={abilityPairs}
+            abilityWinrates={abilityWinrates}
+            abilityShifts={abilityShifts}
+            abilityAghs={abilityAghs}
+          />
+        </>
+      ) : (
+        <>
+          {/* Teams - Simple View */}
+          <div className={styles.teamsContainer}>
+            <div className={styles.team}>
+              {fixedRadiant.map(player => (
+                <PlayerCard
+                  key={player.steamId}
+                  player={player}
+                  isWinner={matchData.radiantWin}
+                  side="radiant"
+                  pickOrderMap={pickOrderMap}
+                  abilityWinrates={abilityWinrates}
+                  abilityPairs={abilityPairs}
+                  simple
+                />
+              ))}
+            </div>
+            <div className={styles.team}>
+              {fixedDire.map(player => (
+                <PlayerCard
+                  key={player.steamId}
+                  player={player}
+                  isWinner={!matchData.radiantWin}
+                  side="dire"
+                  pickOrderMap={pickOrderMap}
+                  abilityWinrates={abilityWinrates}
+                  abilityPairs={abilityPairs}
+                  simple
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Draft Replay Section - Simple */}
+          <DraftReplay
+            picks={matchData.picks}
+            ignoredSpells={matchData.ignoredSpells}
+            radiantPlayers={fixedRadiant}
+            direPlayers={fixedDire}
+            abilityPairs={abilityPairs}
+            abilityWinrates={abilityWinrates}
+            abilityShifts={abilityShifts}
+            abilityAghs={abilityAghs}
+            simple
+          />
+        </>
+      )}
     </PageShell>
   )
 }
@@ -951,9 +1075,10 @@ interface DraftReplayProps {
     healingShift: number
   }>
   abilityAghs: Map<number, { scepterPickRate: number; shardPickRate: number }>
+  simple?: boolean
 }
 
-function DraftReplay({ picks, ignoredSpells, radiantPlayers, direPlayers, abilityPairs, abilityWinrates, abilityShifts, abilityAghs }: DraftReplayProps) {
+function DraftReplay({ picks, ignoredSpells, radiantPlayers, direPlayers, abilityPairs, abilityWinrates, abilityShifts, abilityAghs, simple = false }: DraftReplayProps) {
   const [currentPick, setCurrentPick] = useState(0)
   const [pairsMode, setPairsMode] = useState<'all' | 'diffHero'>('all')
   const [aggregateSortColumn, setAggregateSortColumn] = useState<string>('default')
@@ -1471,15 +1596,17 @@ function DraftReplay({ picks, ignoredSpells, radiantPlayers, direPlayers, abilit
           )
         }
       } else {
-        // Render colored letters for what's still needed
+        // Render colored letters for what's still needed (hide in simple mode)
         slots.push(
           <div key={i} className={`${styles.draftAbilitySlot} ${styles.emptySlot}`}>
-            <span className={styles.emptySlotLabel}>
-              {remaining.spells > 0 && <span className={styles.labelS}>S</span>}
-              {remaining.ultimates > 0 && <span className={styles.labelU}>U</span>}
-              {remaining.heroes > 0 && <span className={styles.labelH}>H</span>}
-              {remaining.spells === 0 && remaining.ultimates === 0 && remaining.heroes === 0 && '?'}
-            </span>
+            {!simple && (
+              <span className={styles.emptySlotLabel}>
+                {remaining.spells > 0 && <span className={styles.labelS}>S</span>}
+                {remaining.ultimates > 0 && <span className={styles.labelU}>U</span>}
+                {remaining.heroes > 0 && <span className={styles.labelH}>H</span>}
+                {remaining.spells === 0 && remaining.ultimates === 0 && remaining.heroes === 0 && '?'}
+              </span>
+            )}
           </div>
         )
       }
@@ -1697,7 +1824,7 @@ function DraftReplay({ picks, ignoredSpells, radiantPlayers, direPlayers, abilit
                   <div className={styles.playerDraftSlots}>
                     {renderPlayerSlots('radiant', playerIdx)}
                   </div>
-                  {renderPlayerSuggestions('radiant', playerIdx)}
+                  {!simple && renderPlayerSuggestions('radiant', playerIdx)}
                 </div>
               </div>
             )
@@ -1776,7 +1903,7 @@ function DraftReplay({ picks, ignoredSpells, radiantPlayers, direPlayers, abilit
           </div>
 
           {/* Highest Priority Section */}
-          {mostContended.length > 0 && (
+          {!simple && mostContended.length > 0 && (
             <div className={styles.mostContendedSection}>
               <span className={styles.mostContendedLabel}>
                 HIGHEST PRIORITY
@@ -1856,6 +1983,24 @@ function DraftReplay({ picks, ignoredSpells, radiantPlayers, direPlayers, abilit
               End
             </button>
           </div>
+          <div className={styles.draftSliderContainer}>
+            <input
+              type="range"
+              min={0}
+              max={picks.length}
+              value={currentPick}
+              onChange={(e) => setCurrentPick(Number(e.target.value))}
+              className={styles.draftSlider}
+            />
+            <div className={styles.draftSliderTicks}>
+              {Array.from({ length: picks.length + 1 }, (_, i) => (
+                <span
+                  key={i}
+                  className={`${styles.draftSliderTick} ${i <= currentPick ? styles.draftSliderTickActive : ''}`}
+                />
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Right Panel - Dire Players (ordered by first pick) */}
@@ -1869,7 +2014,7 @@ function DraftReplay({ picks, ignoredSpells, radiantPlayers, direPlayers, abilit
                   <div className={styles.playerDraftSlots}>
                     {renderPlayerSlots('dire', playerIdx)}
                   </div>
-                  {renderPlayerSuggestions('dire', playerIdx)}
+                  {!simple && renderPlayerSuggestions('dire', playerIdx)}
                 </div>
                 <span className={`${styles.playerNumber} ${styles.direNum}`}>{displayIdx + 1}</span>
               </div>
@@ -1879,7 +2024,7 @@ function DraftReplay({ picks, ignoredSpells, radiantPlayers, direPlayers, abilit
       </div>
 
       {/* Dynamic Tables Section */}
-      <div className={styles.draftDynamicSection}>
+      {!simple && <div className={styles.draftDynamicSection}>
         {/* Best Available Pairs */}
         <div className={`${styles.draftTableContainer} ${styles.narrowTable}`}>
           <div className={styles.draftTableHeader}>
@@ -2139,7 +2284,7 @@ function DraftReplay({ picks, ignoredSpells, radiantPlayers, direPlayers, abilit
             </tbody>
           </table>
         </div>
-      </div>
+      </div>}
     </div>
   )
 }
