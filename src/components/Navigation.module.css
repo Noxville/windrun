@@ -131,10 +131,7 @@
     transform var(--transition-fast),
     visibility var(--transition-fast);
   z-index: 200;
-  box-shadow:
-    0 4px 6px -1px rgba(0, 0, 0, 0.3),
-    0 2px 4px -2px rgba(0, 0, 0, 0.2),
-    var(--glow-accent);
+  box-shadow: 0px 4px 10px #00000096;
 }
 
 .dropdownOpen {
