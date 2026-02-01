@@ -2,6 +2,7 @@ import {
   useState,
   useRef,
   useCallback,
+  memo,
 } from 'react'
 import {
   useReactTable,
@@ -18,6 +19,51 @@ import type {
 } from '@tanstack/react-table'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import styles from './DataTable.module.css'
+
+// Memoized so the row only re-renders when index/rowId change, not on parent scroll.
+interface VirtualTableRowProps<T> {
+  index: number
+  rowId: string
+  rowsRef: React.MutableRefObject<Row<T>[]>
+  rowHeight: number
+  isClickable: boolean
+  onRowClick: (row: Row<T>) => void
+}
+
+function VirtualTableRowInner<T>({
+  index,
+  rowsRef,
+  rowHeight,
+  isClickable,
+  onRowClick,
+}: VirtualTableRowProps<T>) {
+  const row = rowsRef.current[index]
+  if (!row) return null
+  return (
+    <tr
+      className={`${styles.tr} ${isClickable ? styles.trClickable : ''}`}
+      onClick={() => onRowClick(row)}
+      style={{ height: `${rowHeight}px` }}
+    >
+      {row.getVisibleCells().map(cell => {
+        const meta = cell.column.columnDef.meta as { hasBorderLeft?: boolean } | undefined
+        return (
+          <td
+            key={cell.id}
+            className={`${styles.td} ${meta?.hasBorderLeft ? styles.tdBorderLeft : ''}`}
+          >
+            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+          </td>
+        )
+      })}
+    </tr>
+  )
+}
+
+const VirtualTableRow = memo(
+  VirtualTableRowInner,
+  (prev, next) => prev.index === next.index && prev.rowId === next.rowId
+) as typeof VirtualTableRowInner
 
 interface DataTableProps<T> {
   data: T[]
@@ -80,6 +126,8 @@ export function DataTable<T>({
   })
 
   const { rows } = table.getRowModel()
+  const rowsRef = useRef(rows)
+  rowsRef.current = rows
 
   const virtualizer = useVirtualizer({
     count: rows.length,
@@ -91,10 +139,17 @@ export function DataTable<T>({
   const virtualRows = virtualizer.getVirtualItems()
   const totalSize = virtualizer.getTotalSize()
 
-  const paddingTop = virtualRows.length > 0 ? virtualRows[0]?.start ?? 0 : 0
+  // Calculate padding - snap to row height multiples for stability
+  const paddingTop =
+    virtualRows.length > 0
+      ? Math.floor((virtualRows[0]?.start ?? 0) / rowHeight) * rowHeight
+      : 0
   const paddingBottom =
     virtualRows.length > 0
-      ? totalSize - (virtualRows[virtualRows.length - 1]?.end ?? 0)
+      ? Math.floor(
+          (totalSize - (virtualRows[virtualRows.length - 1]?.end ?? 0)) /
+            rowHeight
+        ) * rowHeight
       : 0
 
   const handleRowClick = useCallback(
@@ -258,40 +313,28 @@ export function DataTable<T>({
               )
             })}
           </thead>
-          <tbody>
-            {paddingTop > 0 && (
-              <tr>
-                <td style={{ height: `${paddingTop}px` }} colSpan={columns.length} />
-              </tr>
-            )}
+          <tbody className={styles.tbody}>
+            {/* Always render spacer rows to keep DOM structure stable */}
+            <tr aria-hidden="true">
+              <td style={{ height: paddingTop, padding: 0, border: 'none' }} colSpan={columns.length} />
+            </tr>
             {virtualRows.map(virtualRow => {
               const row = rows[virtualRow.index]
               return (
-                <tr
+                <VirtualTableRow
                   key={row.id}
-                  className={`${styles.tr} ${onRowClick ? styles.trClickable : ''}`}
-                  onClick={() => handleRowClick(row)}
-                  style={{ height: `${rowHeight}px` }}
-                >
-                  {row.getVisibleCells().map(cell => {
-                    const meta = cell.column.columnDef.meta as { hasBorderLeft?: boolean } | undefined
-                    return (
-                      <td
-                        key={cell.id}
-                        className={`${styles.td} ${meta?.hasBorderLeft ? styles.tdBorderLeft : ''}`}
-                      >
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </td>
-                    )
-                  })}
-                </tr>
+                  index={virtualRow.index}
+                  rowId={row.id}
+                  rowsRef={rowsRef}
+                  rowHeight={rowHeight}
+                  isClickable={!!onRowClick}
+                  onRowClick={handleRowClick}
+                />
               )
             })}
-            {paddingBottom > 0 && (
-              <tr>
-                <td style={{ height: `${paddingBottom}px` }} colSpan={columns.length} />
-              </tr>
-            )}
+            <tr aria-hidden="true">
+              <td style={{ height: paddingBottom, padding: 0, border: 'none' }} colSpan={columns.length} />
+            </tr>
           </tbody>
         </table>
 
