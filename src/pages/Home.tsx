@@ -342,7 +342,7 @@ export function HomePage() {
   }, [chartData])
 
   return (
-    <PageShell>
+    <PageShell contentIsScrollTarget={true}>
       <div className={styles.hero}>
         <h1 className={styles.title}>WINDRUN</h1>
         <p className={styles.tagline}>Ability Draft Statistics</p>

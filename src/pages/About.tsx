@@ -3,7 +3,7 @@ import styles from './About.module.css'
 
 export function AboutPage() {
   return (
-    <PageShell title="About">
+    <PageShell title="About" contentIsScrollTarget={true}>
       <div className={styles.content}>
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>About Windrun</h2>

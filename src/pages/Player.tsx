@@ -5,6 +5,7 @@ import { getAbilityById, getHeroById, isAbilityId } from '../data'
 import { heroMiniUrl, heroImageUrl } from '../config'
 import type { PlayerMatch, PlayerMatchPlayer, SpellStat, WinLossStats } from '../types/player'
 import styles from './Player.module.css'
+import { useScrollForwarding } from '../hooks/ScrollForwarding'
 
 function formatRatingWhole(rating: number): string {
   return Math.round(rating).toString()
@@ -87,6 +88,7 @@ export function PlayerPage() {
       }
     }
   }, [isMe, authLoading, user, navigate, login])
+  useScrollForwarding()
 
   const { data: playerResponse, isLoading: playerLoading, error: playerError } = usePlayerData(playerId ?? '')
   const { data: matchesResponse, isLoading: matchesLoading } = usePlayerMatches(playerId ?? '', page)
@@ -151,7 +153,7 @@ export function PlayerPage() {
   const steam64Id = BigInt(player.steamId) + BigInt('76561197960265728')
 
   return (
-    <div className={styles.page}>
+    <div className={styles.page} data-scroll-target>
       {/* Profile Header */}
       <div className={styles.header}>
         <img src={player.avatar} alt="" className={styles.avatar} />
