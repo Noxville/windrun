@@ -114,15 +114,17 @@
    ============================================ */
 .dropdown {
   position: absolute;
-  top: 100%;
+  top: calc(100% - 4px);
   left: 0;
   min-width: 220px;
   background: var(--color-bg-elevated);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   padding: var(--space-xs);
+  padding-top: calc(var(--space-xs) + 4px);
   opacity: 0;
   visibility: hidden;
+  pointer-events: none;
   transform: translateY(-8px);
   transition:
     opacity var(--transition-fast),
@@ -138,7 +140,8 @@
 .dropdownOpen {
   opacity: 1;
   visibility: visible;
-  transform: translateY(4px);
+  pointer-events: auto;
+  transform: translateY(0);
 }
 
 .dropdownItem {
