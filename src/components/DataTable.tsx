@@ -200,7 +200,6 @@ export function DataTable<T>({
         ref={tableContainerRef}
         className={styles.tableContainer}
         style={{ maxHeight }}
-        data-scroll-target
       >
         <table className={styles.table}>
           <thead className={styles.thead}>

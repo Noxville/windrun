@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react'
-import { useScrollForwarding } from '../hooks/ScrollForwarding'
 import styles from './PageShell.module.css'
 
 interface PageShellProps {
@@ -8,7 +7,6 @@ interface PageShellProps {
   actions?: ReactNode
   children: ReactNode
   compact?: boolean
-  contentIsScrollTarget?: boolean
 }
 
 export function PageShell({
@@ -17,9 +15,7 @@ export function PageShell({
   actions,
   children,
   compact = false,
-  contentIsScrollTarget = false,
 }: PageShellProps) {
-  useScrollForwarding()
   return (
     <div className={`${styles.shell} ${compact ? styles.shellCompact : ''}`}>
       {(title || subtitle || actions) && (
@@ -38,7 +34,7 @@ export function PageShell({
         </header>
       )}
 
-      <div className={styles.content} data-scroll-target={contentIsScrollTarget}>{children}</div>
+      <div className={styles.content}>{children}</div>
     </div>
   )
 }
