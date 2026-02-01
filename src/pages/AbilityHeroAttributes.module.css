@@ -40,6 +40,8 @@
    ============================================ */
 .tableContainer {
   overflow-x: auto;
+  overflow-y: auto;
+  max-height: calc(100vh - 280px);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
 }
@@ -115,8 +117,13 @@
   z-index: 30;
 }
 
+.headerRow2 .stickyCol {
+  z-index: 25;
+  top: 32px;
+}
+
 /* ============================================
-   ATTRIBUTE COLORS
+   ATTRIBUTE COLORS (headers)
    ============================================ */
 .attrSTR {
   color: #ef4444;
@@ -138,8 +145,26 @@
   border-left: 2px solid #a855f7;
 }
 
+/* Attribute borders on data rows (by Attribute view) */
+/* Column 2 = first STR cell, 5 = first AGI, 8 = first INT, 11 = first UNI */
+.dataRow:not(.attackTypeRow) td:nth-child(2) {
+  border-left: 2px solid rgba(239, 68, 68, 0.4);
+}
+
+.dataRow:not(.attackTypeRow) td:nth-child(5) {
+  border-left: 2px solid rgba(34, 197, 94, 0.4);
+}
+
+.dataRow:not(.attackTypeRow) td:nth-child(8) {
+  border-left: 2px solid rgba(59, 130, 246, 0.4);
+}
+
+.dataRow:not(.attackTypeRow) td:nth-child(11) {
+  border-left: 2px solid rgba(168, 85, 247, 0.4);
+}
+
 /* ============================================
-   ATTACK TYPE COLORS
+   ATTACK TYPE COLORS (headers)
    ============================================ */
 .melee {
   color: #f59e0b;
@@ -149,6 +174,17 @@
 .ranged {
   color: #06b6d4;
   border-left: 2px solid #06b6d4;
+}
+
+/* Attack type borders on data rows (by Attack Type view) */
+/* These use the same nth-child as attribute view since tables are separate */
+/* Column 2 = first MELEE cell, 5 = first RANGED */
+.attackTypeRow td:nth-child(2) {
+  border-left: 2px solid rgba(245, 158, 11, 0.4);
+}
+
+.attackTypeRow td:nth-child(5) {
+  border-left: 2px solid rgba(6, 182, 212, 0.4);
 }
 
 /* ============================================
