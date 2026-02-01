@@ -3,6 +3,8 @@ import {
   useRef,
   useCallback,
   memo,
+  createContext,
+  useContext,
 } from 'react'
 import {
   useReactTable,
@@ -19,6 +21,13 @@ import type {
 } from '@tanstack/react-table'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import styles from './DataTable.module.css'
+
+/** Display index (0-based) of the current row in the sorted/filtered list. Use for rank columns. */
+export const DataTableDisplayIndexContext = createContext<number | null>(null)
+
+export function useDataTableDisplayIndex(): number | null {
+  return useContext(DataTableDisplayIndexContext)
+}
 
 // Memoized so the row only re-renders when index/rowId change, not on parent scroll.
 interface VirtualTableRowProps<T> {
@@ -321,15 +330,16 @@ export function DataTable<T>({
             {virtualRows.map(virtualRow => {
               const row = rows[virtualRow.index]
               return (
-                <VirtualTableRow
-                  key={row.id}
-                  index={virtualRow.index}
-                  rowId={row.id}
-                  rowsRef={rowsRef}
-                  rowHeight={rowHeight}
-                  isClickable={!!onRowClick}
-                  onRowClick={handleRowClick}
-                />
+                <DataTableDisplayIndexContext.Provider key={row.id} value={virtualRow.index}>
+                  <VirtualTableRow
+                    index={virtualRow.index}
+                    rowId={row.id}
+                    rowsRef={rowsRef}
+                    rowHeight={rowHeight}
+                    isClickable={!!onRowClick}
+                    onRowClick={handleRowClick}
+                  />
+                </DataTableDisplayIndexContext.Provider>
               )
             })}
             <tr aria-hidden="true">

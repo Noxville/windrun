@@ -10,6 +10,7 @@ export {
   TextCell,
   GradientCell,
   GradientBarCell,
+  useDataTableDisplayIndex,
 } from './DataTable'
 export { HeroCard, HeroMini, HeroInline } from './HeroCard'
 export { AbilityIcon, AbilityInline, AbilityRow } from './AbilityIcon'
