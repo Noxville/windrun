@@ -1,5 +1,6 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import styles from './Abilities.module.css'
 import type { ColumnDef } from '@tanstack/react-table'
 import { PageShell } from '../components/PageShell'
 import {
@@ -10,6 +11,7 @@ import {
   HeroInline,
   PatchSelector,
   usePatchSelection,
+  useDataTableDisplayIndex,
 } from '../components'
 import { usePersistedQuery } from '../api'
 import { heroMiniUrl } from '../config'
@@ -53,8 +55,19 @@ interface AbilityStatsRow {
   value: number | null    // ability valuation (picked early/late relative to expected)
 }
 
+function RankCell() {
+  const displayIndex = useDataTableDisplayIndex()
+  const rank = displayIndex !== null ? displayIndex + 1 : 0
+  return (
+    <span style={{ fontSize: 'var(--text-caption)', color: 'var(--color-text-muted)', fontVariantNumeric: 'tabular-nums' }}>
+      #{rank}
+    </span>
+  )
+}
+
 export function AbilitiesPage() {
   const navigate = useNavigate()
+  const [showOnlyAbilities, setShowOnlyAbilities] = useState(false)
   const { currentPatch, prevPatch } = usePatchSelection()
   const { data: apiResponse, isLoading, error } = usePersistedQuery<AbilitiesApiResponse>(
     '/abilities',
@@ -134,6 +147,13 @@ export function AbilitiesPage() {
 
   const columns = useMemo<ColumnDef<AbilityStatsRow>[]>(
     () => [
+      {
+        id: 'rank',
+        header: '#',
+        size: 44,
+        enableSorting: false,
+        cell: () => <RankCell />,
+      },
       {
         accessorKey: 'abilityName',
         header: 'Ability',
@@ -281,6 +301,11 @@ export function AbilitiesPage() {
     [minWinRate, maxWinRate, minPickRate, maxPickRate, minPickPos, maxPickPos]
   )
 
+  const tableData = useMemo(
+    () => (showOnlyAbilities ? statsData.filter(row => !row.isHeroAbility) : statsData),
+    [showOnlyAbilities, statsData]
+  )
+
   const handleRowClick = (row: AbilityStatsRow) => {
     if (row.isHeroAbility && row.heroId) {
       navigate(`/heroes/${row.heroId}`)
@@ -303,10 +328,21 @@ export function AbilitiesPage() {
     <PageShell
       title="Abilities"
       subtitle={prevPatch ? `Comparing ${currentPatch} to ${prevPatch}` : currentPatch ?? 'Loading...'}
-      actions={<PatchSelector />}
+      actions={
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <button
+            type="button"
+            className={`${styles.toggleButton} ${showOnlyAbilities ? styles.toggleButtonActive : ''}`}
+            onClick={() => setShowOnlyAbilities(prev => !prev)}
+          >
+            Show only abilities
+          </button>
+          <PatchSelector />
+        </div>
+      }
     >
       <DataTable
-        data={statsData}
+        data={tableData}
         columns={columns}
         searchPlaceholder="Search abilities..."
         searchableColumns={['abilityName', 'shortName', 'ownerHeroName']}

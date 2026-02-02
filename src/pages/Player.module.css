@@ -1,7 +1,5 @@
 .page {
-  min-height: calc(100vh - 60px); /* Account for nav height */
   padding: var(--space-lg);
-  overflow-y: auto;
 }
 
 .loading {

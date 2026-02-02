@@ -75,12 +75,33 @@ export function Navigation() {
 
   const isActive = (href: string) => {
     if (href === '/') return location.pathname === '/'
-    return location.pathname.startsWith(href)
+    // For exact match
+    if (location.pathname === href) return true
+    // For sub-paths, check if there's a slash after the href
+    // This prevents /heroes from matching /heroes/historic
+    if (location.pathname.startsWith(href + '/')) {
+      // Additional check: only match if href itself doesn't have more specific siblings
+      // For now, just return true - we'll handle specificity differently
+      return true
+    }
+    return false
   }
 
   const isDropdownActive = (item: NavItem) => {
     if (item.href && isActive(item.href)) return true
     return item.children?.some(child => isActive(child.href)) ?? false
+  }
+  
+  // Helper to check if this specific dropdown item should be highlighted
+  const isDropdownItemActive = (href: string, siblings: { href: string }[]) => {
+    if (location.pathname === href) return true
+    // If a more specific sibling matches, don't highlight this one
+    const hasMoreSpecificMatch = siblings.some(
+      sibling => sibling.href !== href && 
+                 sibling.href.startsWith(href + '/') && 
+                 isActive(sibling.href)
+    )
+    return !hasMoreSpecificMatch && isActive(href)
   }
 
   return (
@@ -122,7 +143,7 @@ export function Navigation() {
                     <Link
                       key={child.href}
                       to={child.href}
-                      className={`${styles.dropdownItem} ${isActive(child.href) ? styles.dropdownItemActive : ''}`}
+                      className={`${styles.dropdownItem} ${isDropdownItemActive(child.href, item.children!) ? styles.dropdownItemActive : ''}`}
                     >
                       <span className={styles.dropdownLabel}>{child.label}</span>
                       {child.description && (

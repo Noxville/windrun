@@ -481,7 +481,7 @@ export function AbilityHeroAttributesPage() {
             </thead>
             <tbody>
               {sortedAttackTypeData.map(row => (
-                <tr key={row.abilityId} className={styles.dataRow}>
+                <tr key={row.abilityId} className={`${styles.dataRow} ${styles.attackTypeRow}`}>
                   <td className={styles.stickyCol}>
                     <Link to={`/abilities/${row.abilityId}`} className={styles.abilityLink}>
                       <AbilityInline

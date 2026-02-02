@@ -142,19 +142,23 @@ a:hover {
   flex: 1 1 0;
   min-height: 0;
   width: 100%;
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: var(--space-sm) var(--space-md);
-  overflow: hidden;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
 }
 
-.app-main.app-main-full {
+.app-main > * {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: var(--space-sm) var(--space-md);
+}
+
+.app-main.app-main-full > * {
   max-width: none;
 }
 
-.app-main.app-main-wide {
+.app-main.app-main-wide > * {
   max-width: 1600px;
 }
 

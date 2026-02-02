@@ -114,31 +114,31 @@
    ============================================ */
 .dropdown {
   position: absolute;
-  top: 100%;
+  top: calc(100% - 4px);
   left: 0;
   min-width: 220px;
   background: var(--color-bg-elevated);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   padding: var(--space-xs);
+  padding-top: calc(var(--space-xs) + 4px);
   opacity: 0;
   visibility: hidden;
+  pointer-events: none;
   transform: translateY(-8px);
   transition:
     opacity var(--transition-fast),
     transform var(--transition-fast),
     visibility var(--transition-fast);
   z-index: 200;
-  box-shadow:
-    0 4px 6px -1px rgba(0, 0, 0, 0.3),
-    0 2px 4px -2px rgba(0, 0, 0, 0.2),
-    var(--glow-accent);
+  box-shadow: 0px 4px 10px #00000096;
 }
 
 .dropdownOpen {
   opacity: 1;
   visibility: visible;
-  transform: translateY(4px);
+  pointer-events: auto;
+  transform: translateY(0);
 }
 
 .dropdownItem {
