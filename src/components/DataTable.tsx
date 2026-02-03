@@ -1,11 +1,4 @@
-import {
-  useState,
-  useRef,
-  useCallback,
-  memo,
-  createContext,
-  useContext,
-} from 'react'
+import { useState, useRef, useCallback, memo } from 'react'
 import {
   useReactTable,
   getCoreRowModel,
@@ -20,34 +13,25 @@ import type {
   Row,
 } from '@tanstack/react-table'
 import { useVirtualizer } from '@tanstack/react-virtual'
+import { DataTableDisplayIndexContext } from './DataTableDisplayIndexContext'
 import styles from './DataTable.module.css'
-
-/** Display index (0-based) of the current row in the sorted/filtered list. Use for rank columns. */
-export const DataTableDisplayIndexContext = createContext<number | null>(null)
-
-export function useDataTableDisplayIndex(): number | null {
-  return useContext(DataTableDisplayIndexContext)
-}
 
 // Memoized so the row only re-renders when index/rowId change, not on parent scroll.
 interface VirtualTableRowProps<T> {
   index: number
   rowId: string
-  rowsRef: React.MutableRefObject<Row<T>[]>
+  row: Row<T>
   rowHeight: number
   isClickable: boolean
   onRowClick: (row: Row<T>) => void
 }
 
 function VirtualTableRowInner<T>({
-  index,
-  rowsRef,
+  row,
   rowHeight,
   isClickable,
   onRowClick,
 }: VirtualTableRowProps<T>) {
-  const row = rowsRef.current[index]
-  if (!row) return null
   return (
     <tr
       className={`${styles.tr} ${isClickable ? styles.trClickable : ''}`}
@@ -80,6 +64,9 @@ interface DataTableProps<T> {
   searchPlaceholder?: string
   searchableColumns?: string[]
   initialSorting?: SortingState
+  /** When provided with onSortingChange, sorting is controlled by the parent (e.g. to preserve sort across remounts). */
+  sorting?: SortingState
+  onSortingChange?: (updater: React.SetStateAction<SortingState>) => void
   rowHeight?: number
   maxHeight?: string
   onRowClick?: (row: T) => void
@@ -95,6 +82,8 @@ export function DataTable<T>({
   searchPlaceholder = 'Search...',
   searchableColumns,
   initialSorting = [],
+  sorting: controlledSorting,
+  onSortingChange: controlledOnSortingChange,
   rowHeight = 40,
   maxHeight = 'calc(100vh - 340px)',
   onRowClick,
@@ -103,9 +92,13 @@ export function DataTable<T>({
   loadingRows = 10,
   extraStats,
 }: DataTableProps<T>) {
-  const [sorting, setSorting] = useState<SortingState>(initialSorting)
+  const [internalSorting, setInternalSorting] = useState<SortingState>(initialSorting)
   const [globalFilter, setGlobalFilter] = useState('')
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+
+  const isControlled = controlledSorting !== undefined && controlledOnSortingChange !== undefined
+  const sorting = isControlled ? controlledSorting! : internalSorting
+  const setSorting = isControlled ? controlledOnSortingChange! : setInternalSorting
 
   const tableContainerRef = useRef<HTMLDivElement>(null)
 
@@ -135,8 +128,6 @@ export function DataTable<T>({
   })
 
   const { rows } = table.getRowModel()
-  const rowsRef = useRef(rows)
-  rowsRef.current = rows
 
   const virtualizer = useVirtualizer({
     count: rows.length,
@@ -334,7 +325,7 @@ export function DataTable<T>({
                   <VirtualTableRow
                     index={virtualRow.index}
                     rowId={row.id}
-                    rowsRef={rowsRef}
+                    row={row}
                     rowHeight={rowHeight}
                     isClickable={!!onRowClick}
                     onRowClick={handleRowClick}

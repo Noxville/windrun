@@ -40,8 +40,9 @@ export function usePersistedQuery<T>(
 ) {
   const searchParams = params ? '?' + new URLSearchParams(params).toString() : ''
   const enabled = options?.enabled !== false && path !== null
+  const paramsKey = params ? new URLSearchParams(params).toString() : ''
   return useQuery<T>({
-    queryKey: ['query', path, params],
+    queryKey: ['query', path, paramsKey],
     queryFn: () => apiFetch<T>(`/api/v2${path}${searchParams}`),
     staleTime: 5 * 60 * 1000,
     retry: retryOn503,

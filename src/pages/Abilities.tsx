@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import styles from './Abilities.module.css'
-import type { ColumnDef } from '@tanstack/react-table'
+import type { ColumnDef, SortingState } from '@tanstack/react-table'
 import { PageShell } from '../components/PageShell'
 import {
   DataTable,
@@ -65,9 +65,12 @@ function RankCell() {
   )
 }
 
+const DEFAULT_SORTING: SortingState = [{ id: 'winRate', desc: true }]
+
 export function AbilitiesPage() {
   const navigate = useNavigate()
   const [showOnlyAbilities, setShowOnlyAbilities] = useState(false)
+  const [sorting, setSorting] = useState<SortingState>(DEFAULT_SORTING)
   const { currentPatch, prevPatch } = usePatchSelection()
   const { data: apiResponse, isLoading, error } = usePersistedQuery<AbilitiesApiResponse>(
     '/abilities',
@@ -342,11 +345,14 @@ export function AbilitiesPage() {
       }
     >
       <DataTable
+        key={currentPatch ?? ''}
         data={tableData}
         columns={columns}
         searchPlaceholder="Search abilities..."
         searchableColumns={['abilityName', 'shortName', 'ownerHeroName']}
-        initialSorting={[{ id: 'winRate', desc: true }]}
+        initialSorting={sorting}
+        sorting={sorting}
+        onSortingChange={setSorting}
         onRowClick={handleRowClick}
         emptyMessage="No abilities found"
         loading={isLoading}
