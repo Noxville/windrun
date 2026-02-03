@@ -20,21 +20,18 @@ import styles from './DataTable.module.css'
 interface VirtualTableRowProps<T> {
   index: number
   rowId: string
-  rowsRef: React.MutableRefObject<Row<T>[]>
+  row: Row<T>
   rowHeight: number
   isClickable: boolean
   onRowClick: (row: Row<T>) => void
 }
 
 function VirtualTableRowInner<T>({
-  index,
-  rowsRef,
+  row,
   rowHeight,
   isClickable,
   onRowClick,
 }: VirtualTableRowProps<T>) {
-  const row = rowsRef.current[index]
-  if (!row) return null
   return (
     <tr
       className={`${styles.tr} ${isClickable ? styles.trClickable : ''}`}
@@ -131,8 +128,6 @@ export function DataTable<T>({
   })
 
   const { rows } = table.getRowModel()
-  const rowsRef = useRef(rows)
-  rowsRef.current = rows
 
   const virtualizer = useVirtualizer({
     count: rows.length,
@@ -330,7 +325,7 @@ export function DataTable<T>({
                   <VirtualTableRow
                     index={virtualRow.index}
                     rowId={row.id}
-                    rowsRef={rowsRef}
+                    row={row}
                     rowHeight={rowHeight}
                     isClickable={!!onRowClick}
                     onRowClick={handleRowClick}
