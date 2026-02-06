@@ -30,3 +30,59 @@
   background: rgba(45, 212, 191, 0.1);
   border-color: var(--color-accent);
 }
+
+/* ============================================
+   HELP ICON
+   ============================================ */
+.helpIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  font-size: 10px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  cursor: help;
+  margin-left: 4px;
+  transition: all 0.2s ease;
+}
+
+.helpIcon:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+/* ============================================
+   TRIPLET CELL
+   ============================================ */
+.tripletCell {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.tripletIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border-radius: var(--radius-sm);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  cursor: pointer;
+}
+
+.tripletIcon:hover {
+  transform: scale(1.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.tripletHeroIcon {
+  width: 24px;
+  height: 24px;
+  object-fit: cover;
+  object-position: center;
+  border-radius: var(--radius-xs);
+  display: block;
+}

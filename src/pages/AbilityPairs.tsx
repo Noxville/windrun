@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import type { ColumnDef } from '@tanstack/react-table'
 import { PageShell } from '../components/PageShell'
 import {
@@ -7,12 +7,14 @@ import {
   GradientCell,
   NumericCell,
   AbilityInline,
+  AbilityIcon,
   HeroInline,
   PatchSelector,
   usePatchSelection,
 } from '../components'
 import { usePersistedQuery } from '../api'
 import { getAbilityById, getHeroById } from '../data'
+import { heroMiniUrl } from '../config'
 import styles from './AbilityPairs.module.css'
 
 // API response format for pairs
@@ -40,6 +42,36 @@ interface AbilitiesApiResponse {
       winrate: number
     }>
   }
+}
+
+// API response format for triplets
+interface AbilityTripletsApiResponse {
+  data: {
+    patches: { overall: string[] }
+    abilityTriplets: Array<{
+      abilityIdOne: number
+      abilityIdTwo: number
+      abilityIdThree: number
+      numPicks: number
+      wins: number
+      winrate: number
+    }>
+  }
+}
+
+// Hidden triple info to display
+interface HiddenTriple {
+  abilityId: number
+  abilityName: string
+  shortName: string
+  isUltimate: boolean
+  isHeroAbility: boolean
+  heroId?: number
+  heroPicture?: string
+  ownerHeroId?: number | null
+  numPicks: number
+  winrate: number
+  winrateShift: number // triplet winrate - pair winrate
 }
 
 // Helper to resolve ability info including hero abilities
@@ -88,6 +120,7 @@ interface AbilityPairRow {
   wins: number
   pairWinRate: number
   synergy: number | null
+  hiddenTriples: HiddenTriple[]
 }
 
 // Render cell for ability (or hero)
@@ -142,7 +175,14 @@ export function AbilityPairsPage() {
     { enabled: !!currentPatch }
   )
 
-  const isLoading = pairsLoading || abilitiesLoading
+  // Fetch ability triplets for hidden triple detection
+  const { data: tripletsResponse, isLoading: tripletsLoading } = usePersistedQuery<AbilityTripletsApiResponse>(
+    '/ability-triplets',
+    currentPatch ? { patch: currentPatch } : undefined,
+    { enabled: !!currentPatch }
+  )
+
+  const isLoading = pairsLoading || abilitiesLoading || tripletsLoading
 
   const handleExcludeSameHeroToggle = () => {
     const newParams = new URLSearchParams(searchParams)
@@ -164,6 +204,80 @@ export function AbilityPairsPage() {
     return map
   }, [abilitiesResponse])
 
+  // Build pair numPicks lookup map for threshold checking
+  const pairPicksMap = useMemo(() => {
+    if (!pairsResponse?.data?.abilityPairs) return new Map<string, number>()
+    const map = new Map<string, number>()
+    pairsResponse.data.abilityPairs.forEach(pair => {
+      // Keys are already sorted (abilityIdOne < abilityIdTwo)
+      const key = `${pair.abilityIdOne}-${pair.abilityIdTwo}`
+      map.set(key, pair.numPicks)
+    })
+    return map
+  }, [pairsResponse])
+
+  // Build hidden triples lookup map from triplets data
+  // For each triplet (A,B,C), check each implied pair against the threshold
+  const hiddenTriplesMap = useMemo(() => {
+    const map = new Map<string, HiddenTriple[]>()
+    if (!tripletsResponse?.data?.abilityTriplets || pairPicksMap.size === 0) {
+      return map
+    }
+
+    for (const triplet of tripletsResponse.data.abilityTriplets) {
+      const { abilityIdOne: a, abilityIdTwo: b, abilityIdThree: c, numPicks: tripletPicks, winrate } = triplet
+
+      // Check each implied pair: [pairId1, pairId2, hiddenAbilityId]
+      const impliedPairs: [number, number, number][] = [
+        [a, b, c],
+        [a, c, b],
+        [b, c, a],
+      ]
+
+      for (const [pairId1, pairId2, hiddenId] of impliedPairs) {
+        const pairKey = `${pairId1}-${pairId2}`
+        const pairPicks = pairPicksMap.get(pairKey)
+        if (pairPicks === undefined) continue
+
+        // Determine threshold based on whether any two abilities share the same hero
+        const pair1Info = resolveAbilityInfo(pairId1)
+        const pair2Info = resolveAbilityInfo(pairId2)
+        const hiddenInfo = resolveAbilityInfo(hiddenId)
+        const hero1 = pair1Info.ownerHeroId
+        const hero2 = pair2Info.ownerHeroId
+        const heroHidden = hiddenInfo.ownerHeroId
+        const anyTwoShareHero =
+          (hero1 != null && hero1 === hero2) ||
+          (hero1 != null && hero1 === heroHidden) ||
+          (hero2 != null && hero2 === heroHidden)
+        const thresholdFactor = anyTwoShareHero ? 0.60 : 0.0001
+        const threshold = thresholdFactor * pairPicks
+
+        // Triplet picks must meet threshold relative to pair picks
+        if (tripletPicks >= threshold) {
+          const info = hiddenInfo
+          const existing = map.get(pairKey) ?? []
+          existing.push({
+            abilityId: info.abilityId,
+            abilityName: info.abilityName,
+            shortName: info.shortName,
+            isUltimate: info.isUltimate,
+            isHeroAbility: info.isHeroAbility,
+            heroId: info.heroId,
+            heroPicture: info.heroPicture,
+            ownerHeroId: info.ownerHeroId,
+            numPicks: tripletPicks,
+            winrate: winrate * 100,
+            winrateShift: 0, // Calculated in statsData
+          })
+          map.set(pairKey, existing)
+        }
+      }
+    }
+
+    return map
+  }, [tripletsResponse, pairPicksMap])
+
   // Transform API response into array format
   const statsData = useMemo<AbilityPairRow[]>(() => {
     if (!pairsResponse?.data?.abilityPairs) return []
@@ -183,8 +297,28 @@ export function AbilityPairsPage() {
           synergy = pairWinRate - geometricMean
         }
 
+        // Get hidden triples from the pre-computed map
+        const pairKey = `${pair.abilityIdOne}-${pair.abilityIdTwo}`
+        const rawHiddenTriples = hiddenTriplesMap.get(pairKey) ?? []
+
+        // Process hidden triples: calculate winrateShift, filter by same hero, sort by shift
+        const hiddenTriples = rawHiddenTriples
+          .map(triple => ({
+            ...triple,
+            winrateShift: triple.winrate - pairWinRate, // triplet WR - pair WR
+          }))
+          .filter(triple => {
+            if (!excludeSameHero) return true
+            // Filter out hidden triples from same hero as ability 1 or ability 2
+            if (triple.ownerHeroId == null) return true
+            if (one.ownerHeroId != null && triple.ownerHeroId === one.ownerHeroId) return false
+            if (two.ownerHeroId != null && triple.ownerHeroId === two.ownerHeroId) return false
+            return true
+          })
+          .sort((a, b) => b.winrateShift - a.winrateShift) // Sort by shift descending
+
         return {
-          key: `${pair.abilityIdOne}-${pair.abilityIdTwo}`,
+          key: pairKey,
           abilityIdOne: one.abilityId,
           abilityNameOne: one.abilityName,
           shortNameOne: one.shortName,
@@ -207,6 +341,7 @@ export function AbilityPairsPage() {
           wins: pair.wins,
           pairWinRate,
           synergy,
+          hiddenTriples,
         }
       })
       .filter(row => row.picks >= 50)
@@ -216,7 +351,7 @@ export function AbilityPairsPage() {
         if (row.ownerHeroIdOne == null || row.ownerHeroIdTwo == null) return true
         return row.ownerHeroIdOne !== row.ownerHeroIdTwo
       })
-  }, [pairsResponse, abilityWinRateMap, excludeSameHero])
+  }, [pairsResponse, abilityWinRateMap, excludeSameHero, hiddenTriplesMap])
 
   const columns = useMemo<ColumnDef<AbilityPairRow>[]>(
     () => [
@@ -297,6 +432,84 @@ export function AbilityPairsPage() {
             }}>
               {isPositive ? '+' : ''}{value.toFixed(1)}%
             </span>
+          )
+        },
+      },
+      {
+        accessorKey: 'hiddenTriples',
+        header: () => (
+          <span>
+            Hidden Triples
+            <span
+              className={styles.helpIcon}
+              title="Third ability from a commonly drafted triplet. If pair (A,B) is often picked with C, and the triplet has similar pick counts, C is shown here. These pairs may have inflated synergy."
+            >
+              ?
+            </span>
+          </span>
+        ),
+        size: 120,
+        cell: info => {
+          const triples = info.getValue() as HiddenTriple[]
+          if (triples.length === 0) {
+            return <span style={{ color: 'var(--color-text-muted)' }}>-</span>
+          }
+
+          // Helper to get background color based on winrate shift
+          const getShiftBackground = (shift: number) => {
+            // Clamp shift to -10 to +10 range for color intensity
+            const clampedShift = Math.max(-10, Math.min(10, shift))
+            const intensity = Math.abs(clampedShift) / 10 // 0 to 1
+            const alpha = 0.15 + intensity * 0.35 // 0.15 to 0.5 alpha
+            if (shift >= 0) {
+              return `rgba(34, 197, 94, ${alpha})` // green
+            } else {
+              return `rgba(239, 68, 68, ${alpha})` // red
+            }
+          }
+
+          const formatShift = (shift: number) => shift >= 0 ? `+${shift.toFixed(1)}%` : `${shift.toFixed(1)}%`
+
+          const getTooltipText = (triple: HiddenTriple) =>
+            `${triple.abilityName}\n${triple.numPicks.toLocaleString()} games\n${triple.winrate.toFixed(1)}% WR\nShift: ${formatShift(triple.winrateShift)}`
+
+          return (
+            <div className={styles.tripletCell}>
+              {triples.map(triple => (
+                triple.isHeroAbility && triple.heroId ? (
+                  <Link
+                    key={triple.abilityId}
+                    to={`/heroes/${triple.heroId}`}
+                    className={styles.tripletIcon}
+                    style={{ background: getShiftBackground(triple.winrateShift) }}
+                    title={getTooltipText(triple)}
+                  >
+                    <img
+                      src={heroMiniUrl(triple.heroPicture || '')}
+                      alt={triple.abilityName}
+                      className={styles.tripletHeroIcon}
+                    />
+                  </Link>
+                ) : (
+                  <span
+                    key={triple.abilityId}
+                    className={styles.tripletIcon}
+                    style={{ background: getShiftBackground(triple.winrateShift) }}
+                    title={getTooltipText(triple)}
+                  >
+                    <AbilityIcon
+                      id={triple.abilityId}
+                      name={triple.abilityName}
+                      shortName={triple.shortName}
+                      isUltimate={triple.isUltimate}
+                      size="sm"
+                      showTooltip={false}
+                      linkTo={`/abilities/${triple.abilityId}`}
+                    />
+                  </span>
+                )
+              ))}
+            </div>
           )
         },
       },
