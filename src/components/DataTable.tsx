@@ -120,7 +120,8 @@ export function DataTable<T>({
       ? (row, _columnId, filterValue) => {
           const search = filterValue.toLowerCase()
           return searchableColumns.some(col => {
-            const value = row.getValue(col)
+            // Try column accessor first, then fall back to row.original for non-column fields
+            const value = row.getValue(col) ?? (row.original as Record<string, unknown>)[col]
             return String(value ?? '').toLowerCase().includes(search)
           })
         }
