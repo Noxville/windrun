@@ -19,7 +19,7 @@ export function Footer() {
           Datdota Discord
         </a>
         <span className={styles.sep}>|</span>
-        <a href="https://discord.gg/abilitydraft" target="_blank" rel="noopener noreferrer" className={styles.link}>
+        <a href="https://discord.gg/xeVvDBpkvC" target="_blank" rel="noopener noreferrer" className={styles.link}>
           AD Community
         </a>
         <span className={styles.sep}>|</span>
