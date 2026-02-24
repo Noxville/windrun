@@ -59,6 +59,140 @@ interface PlayerMatchData {
   won: boolean
 }
 
+interface RatingPoint {
+  rating: number
+  delta: number
+  won: boolean
+  matchId: number
+}
+
+function RatingChart({ data, styles }: { data: RatingPoint[]; styles: Record<string, string> }) {
+  const [hoveredPoint, setHoveredPoint] = useState<{ index: number; x: number; y: number } | null>(null)
+
+  if (data.length < 2) return null
+
+  const width = 300
+  const height = 80
+  const padding = { top: 10, right: 10, bottom: 10, left: 40 }
+  const chartWidth = width - padding.left - padding.right
+  const chartHeight = height - padding.top - padding.bottom
+
+  const ratings = data.map(d => d.rating)
+  const minRating = Math.min(...ratings)
+  const maxRating = Math.max(...ratings)
+  const ratingRange = maxRating - minRating || 1
+
+  // Scale functions
+  const xScale = (i: number) => padding.left + (i / (data.length - 1)) * chartWidth
+  const yScale = (rating: number) => padding.top + chartHeight - ((rating - minRating) / ratingRange) * chartHeight
+
+  // Build path
+  const pathPoints = data.map((d, i) => `${i === 0 ? 'M' : 'L'} ${xScale(i)} ${yScale(d.rating)}`).join(' ')
+
+  // Y-axis labels (just min/max)
+  const yLabels = [
+    { value: maxRating, y: yScale(maxRating) },
+    { value: minRating, y: yScale(minRating) },
+  ]
+
+  const hoveredData = hoveredPoint !== null ? data[hoveredPoint.index] : null
+
+  return (
+    <div className={styles.statsPanel}>
+      <h3 className={styles.panelTitle}>Rating History</h3>
+      <div className={styles.chartContainer}>
+        <svg viewBox={`0 0 ${width} ${height}`} className={styles.chartSvg}>
+          {/* Grid lines */}
+          <line
+            x1={padding.left}
+            y1={yScale(maxRating)}
+            x2={width - padding.right}
+            y2={yScale(maxRating)}
+            stroke="var(--color-border)"
+            strokeDasharray="2,2"
+          />
+          <line
+            x1={padding.left}
+            y1={yScale(minRating)}
+            x2={width - padding.right}
+            y2={yScale(minRating)}
+            stroke="var(--color-border)"
+            strokeDasharray="2,2"
+          />
+
+          {/* Y-axis labels */}
+          {yLabels.map(({ value, y }) => (
+            <text
+              key={value}
+              x={padding.left - 4}
+              y={y}
+              textAnchor="end"
+              dominantBaseline="middle"
+              fill="var(--color-text-muted)"
+              fontSize="9"
+            >
+              {Math.round(value)}
+            </text>
+          ))}
+
+          {/* Line */}
+          <path
+            d={pathPoints}
+            fill="none"
+            stroke="var(--color-accent)"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+
+          {/* Points */}
+          {data.map((d, i) => (
+            <circle
+              key={d.matchId}
+              cx={xScale(i)}
+              cy={yScale(d.rating)}
+              r={hoveredPoint?.index === i ? 4 : 2.5}
+              fill={d.won ? 'var(--color-positive)' : 'var(--color-negative)'}
+              stroke="var(--color-bg)"
+              strokeWidth="0.5"
+              style={{ cursor: 'pointer', transition: 'r 0.1s ease' }}
+              onMouseEnter={(e) => {
+                const svg = e.currentTarget.ownerSVGElement
+                if (!svg) return
+                const rect = svg.getBoundingClientRect()
+                const xPct = xScale(i) / width
+                const yPct = yScale(d.rating) / height
+                setHoveredPoint({
+                  index: i,
+                  x: rect.left + xPct * rect.width,
+                  y: rect.top + yPct * rect.height
+                })
+              }}
+              onMouseLeave={() => setHoveredPoint(null)}
+            />
+          ))}
+        </svg>
+
+        {/* Tooltip */}
+        {hoveredPoint && hoveredData && (
+          <div
+            className={styles.chartTooltip}
+            style={{
+              left: `${(xScale(hoveredPoint.index) / width) * 100}%`,
+              top: `${(yScale(hoveredData.rating) / height) * 100}%`,
+            }}
+          >
+            <div className={styles.tooltipRating}>{Math.round(hoveredData.rating)}</div>
+            <div className={`${styles.tooltipDelta} ${hoveredData.won ? styles.tooltipDeltaPositive : styles.tooltipDeltaNegative}`}>
+              {hoveredData.delta >= 0 ? '+' : ''}{hoveredData.delta.toFixed(1)}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 type SortField = 'games' | 'winrate'
 
 export function PlayerPage() {
@@ -66,6 +200,7 @@ export function PlayerPage() {
   const navigate = useNavigate()
   const { user, isLoading: authLoading, login } = useAuth()
   const [page, setPage] = useState(0)
+  const [matchPage, setMatchPage] = useState(0) // 0 = first 10, 1 = middle 10, 2 = last 10
   const [heroSort, setHeroSort] = useState<SortField>('games')
   const [abilitySort, setAbilitySort] = useState<SortField>('games')
   const [allySort, setAllySort] = useState<SortField>('games')
@@ -128,6 +263,34 @@ export function PlayerPage() {
         return dateB - dateA // Most recent first
       })
   }, [matchesResponse, playerIdNum])
+
+  // Calculate rating history from current rating and match deltas
+  const ratingHistory = useMemo(() => {
+    if (!player || processedMatches.length === 0) return []
+
+    const history: { rating: number; delta: number; won: boolean; matchId: number }[] = []
+    let currentRating = player.rating
+
+    // Add current rating as the most recent point
+    // Then work backwards through matches to calculate historical ratings
+    for (const matchData of processedMatches) {
+      const delta = matchData.match.delta
+      if (delta === undefined || delta === null) continue
+
+      history.push({
+        rating: currentRating,
+        delta,
+        won: matchData.won,
+        matchId: matchData.match.matchId
+      })
+
+      // Go back in time: before this game, rating was current minus delta
+      currentRating = currentRating - delta
+    }
+
+    // Reverse so oldest is first (left side of chart)
+    return history.reverse()
+  }, [player, processedMatches])
 
   // Show loading while handling /players/me redirect
   if (isMe || authLoading || playerLoading || !playerId) {
@@ -462,10 +625,27 @@ export function PlayerPage() {
           </div>}
         </div>
 
-        {/* Right Column: Recent Matches */}
+        {/* Right Column: Rating Chart + Recent Matches */}
         <div className={styles.rightColumn}>
+          {ratingHistory.length >= 2 && (
+            <RatingChart data={ratingHistory} styles={styles} />
+          )}
           <div className={styles.statsPanel}>
-            <h3 className={styles.panelTitle}>Recent Matches</h3>
+            <div className={styles.panelHeader}>
+              <h3 className={styles.panelTitle}>Recent Matches</h3>
+              {processedMatches.length > 10 && (
+                <div className={styles.matchPageSelector}>
+                  {[0, 1, 2].map(p => (
+                    <button
+                      key={p}
+                      className={`${styles.matchPageDot} ${matchPage === p ? styles.matchPageDotActive : ''}`}
+                      onClick={() => setMatchPage(p)}
+                      title={p === 0 ? 'Most recent' : p === 1 ? 'Middle' : 'Oldest'}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
 
         {matchesLoading ? (
           <div className={styles.loading}>Loading matches...</div>
@@ -475,7 +655,7 @@ export function PlayerPage() {
           <>
             <div className={styles.matchListContainer}>
               <div className={styles.matchList}>
-                {processedMatches.slice(0, 10).map(({ match, player: matchPlayer, won }) => {
+                {processedMatches.slice(matchPage * 10, matchPage * 10 + 10).map(({ match, player: matchPlayer, won }) => {
                   const hero = getHeroById(matchPlayer.hero)
                   // Filter out hero innates (negative IDs) - only show drafted abilities
                   const draftedAbilities = (matchPlayer.abilities ?? []).filter(id => id > 0)
