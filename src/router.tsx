@@ -32,6 +32,7 @@ import { AbilityShiftsPage } from './pages/AbilityShifts'
 import { AbilityHeroAttributesPage } from './pages/AbilityHeroAttributes'
 import { AbilityByHeroPage } from './pages/AbilityByHero'
 import { AbilityAghsPage } from './pages/AbilityAghs'
+import { AbilityTiersPage } from './pages/AbilityTiers'
 import { LeaderboardPage } from './pages/Leaderboard'
 import { DistributionPage } from './pages/Distribution'
 import { PlayerPage } from './pages/Player'
@@ -52,6 +53,7 @@ export const router = createBrowserRouter([
       { path: '/heroes/:heroId', element: <HeroDetailPage /> },
       { path: '/facets', element: <FacetsPage /> },
       { path: '/abilities', element: <AbilitiesPage /> },
+      { path: '/abilities/tiers', element: <AbilityTiersPage /> },
       { path: '/abilities/:abilityId', element: <AbilityDetailPage /> },
       { path: '/ability-pairs', element: <AbilityPairsPage /> },
       { path: '/ability-high-skill', element: <AbilityHighSkillPage /> },

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import styles from './Abilities.module.css'
 import type { ColumnDef, SortingState } from '@tanstack/react-table'
 import { PageShell } from '../components/PageShell'
@@ -69,9 +69,24 @@ const DEFAULT_SORTING: SortingState = [{ id: 'winRate', desc: true }]
 
 export function AbilitiesPage() {
   const navigate = useNavigate()
-  const [showOnlyAbilities, setShowOnlyAbilities] = useState(false)
+  const [searchParams, setSearchParams] = useSearchParams()
   const [sorting, setSorting] = useState<SortingState>(DEFAULT_SORTING)
   const { currentPatch, prevPatch } = usePatchSelection()
+
+  // Filter toggles from URL
+  const hideUltimates = searchParams.get('hideUltimates') === 'true'
+  const hideHeroes = searchParams.get('hideHeroes') === 'true'
+  const hideAbilities = searchParams.get('hideAbilities') === 'true'
+
+  const toggleFilter = (param: string, currentValue: boolean) => {
+    const newParams = new URLSearchParams(searchParams)
+    if (currentValue) {
+      newParams.delete(param)
+    } else {
+      newParams.set(param, 'true')
+    }
+    setSearchParams(newParams)
+  }
   const { data: apiResponse, isLoading, error } = usePersistedQuery<AbilitiesApiResponse>(
     '/abilities',
     currentPatch ? { patch: currentPatch } : undefined,
@@ -305,8 +320,13 @@ export function AbilitiesPage() {
   )
 
   const tableData = useMemo(
-    () => (showOnlyAbilities ? statsData.filter(row => !row.isHeroAbility) : statsData),
-    [showOnlyAbilities, statsData]
+    () => statsData.filter(row => {
+      if (hideUltimates && row.isUltimate) return false
+      if (hideHeroes && row.isHeroAbility) return false
+      if (hideAbilities && !row.isHeroAbility && !row.isUltimate) return false
+      return true
+    }),
+    [hideUltimates, hideHeroes, hideAbilities, statsData]
   )
 
   const handleRowClick = (row: AbilityStatsRow) => {
@@ -332,13 +352,27 @@ export function AbilitiesPage() {
       title="Abilities"
       subtitle={prevPatch ? `Comparing ${currentPatch} to ${prevPatch}` : currentPatch ?? 'Loading...'}
       actions={
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
           <button
             type="button"
-            className={`${styles.toggleButton} ${showOnlyAbilities ? styles.toggleButtonActive : ''}`}
-            onClick={() => setShowOnlyAbilities(prev => !prev)}
+            className={`${styles.toggleButton} ${hideUltimates ? styles.toggleButtonActive : ''}`}
+            onClick={() => toggleFilter('hideUltimates', hideUltimates)}
           >
-            Show only abilities
+            Hide Ultimates
+          </button>
+          <button
+            type="button"
+            className={`${styles.toggleButton} ${hideHeroes ? styles.toggleButtonActive : ''}`}
+            onClick={() => toggleFilter('hideHeroes', hideHeroes)}
+          >
+            Hide Heroes
+          </button>
+          <button
+            type="button"
+            className={`${styles.toggleButton} ${hideAbilities ? styles.toggleButtonActive : ''}`}
+            onClick={() => toggleFilter('hideAbilities', hideAbilities)}
+          >
+            Hide Abilities
           </button>
           <PatchSelector />
         </div>

@@ -23,6 +23,7 @@ const NAV_ITEMS: NavItem[] = [
     label: 'Abilities',
     children: [
       { label: 'All Abilities', href: '/abilities', description: 'Stats & valuations' },
+      { label: 'Tier List', href: '/abilities/tiers', description: 'Visual tier ranking' },
       { label: 'Ability Pairs', href: '/ability-pairs', description: 'Synergy combinations' },
       { label: 'High Skill', href: '/ability-high-skill', description: 'High MMR analysis' },
       { label: 'By Hero', href: '/ability-by-hero', description: 'Grouped by origin' },
