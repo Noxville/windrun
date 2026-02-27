@@ -49,7 +49,7 @@ const TAG_DEFINITIONS: TagDefinition[] = [
       const middle = deltas.slice(1, -1)
       if (first === null || last === null) return false
       if (first >= 0 || last >= 0) return false
-      const middleAvg = middle.reduce((sum, d) => sum + (d ?? 0), 0) / middle.length
+      const middleAvg = middle.reduce((sum: number, d) => sum + (d ?? 0), 0) / middle.length
       return middleAvg > 0.15
     },
   },
@@ -65,7 +65,7 @@ const TAG_DEFINITIONS: TagDefinition[] = [
       const middle = deltas.slice(1, -1)
       if (first === null || last === null) return false
       if (first <= 0 || last <= 0) return false
-      const middleAvg = middle.reduce((sum, d) => sum + (d ?? 0), 0) / middle.length
+      const middleAvg = middle.reduce((sum: number, d) => sum + (d ?? 0), 0) / middle.length
       return middleAvg < -0.3
     },
   },
@@ -298,7 +298,7 @@ export function AbilityByTimePage() {
         const heroIdFromAbility = isHeroAbility ? Math.abs(stat.abilityId) : undefined
         const hero = heroIdFromAbility ? getHeroById(heroIdFromAbility) : undefined
         const ability = !isHeroAbility ? getAbilityById(stat.abilityId) : undefined
-        const ownerHeroId = isHeroAbility ? heroIdFromAbility : ability?.heroId
+        const ownerHeroId = isHeroAbility ? heroIdFromAbility : (ability?.ownerHeroId ?? undefined)
 
         // Build winrate map from buckets
         const bucketWinrates: Record<string, number | null> = {}
