@@ -16,6 +16,17 @@ interface PlayerStats {
   region?: string
 }
 
+interface PatchInfo {
+  firstMatch: string
+  totalGames: number
+  radiantWins: number
+  avgDuration: number
+}
+
+interface PatchesApiResponse {
+  data: Record<string, PatchInfo>
+}
+
 interface RecommendedMatch {
   matchId: number
   region: string
@@ -47,8 +58,27 @@ interface HomeApiResponse {
 
 export function HomePage() {
   const { data: apiResponse, isLoading } = usePersistedQuery<HomeApiResponse>('/home')
+  const { data: patchesResponse } = usePersistedQuery<PatchesApiResponse>('/static/patches')
   const chartRef = useRef<SVGSVGElement>(null)
+  const patchChartRef = useRef<SVGSVGElement>(null)
   const [replayPage, setReplayPage] = useState(0)
+
+  // Process patches data (convert object to array)
+  const patches = useMemo(() => {
+    if (!patchesResponse?.data || typeof patchesResponse.data !== 'object') {
+      return []
+    }
+    return Object.entries(patchesResponse.data)
+      .map(([name, info]) => ({
+        name,
+        ...info,
+        firstMatchDate: new Date(info.firstMatch),
+        // Calculate radiant winrate as percentage
+        radiantWinrate: info.totalGames > 0 ? (info.radiantWins / info.totalGames) * 100 : 50,
+      }))
+      .filter(p => !isNaN(p.firstMatchDate.getTime()))
+      .sort((a, b) => a.firstMatchDate.getTime() - b.firstMatchDate.getTime())
+  }, [patchesResponse])
 
   // Merge weekly games and players data by date
   const chartData = useMemo(() => {
@@ -216,7 +246,7 @@ export function HomePage() {
             .html(`
               <div style="color: var(--color-text); margin-bottom: 4px; font-weight: bold;">${formatDate(d.date)}</div>
               <div style="color: var(--color-accent);">Games: ${d.games?.toLocaleString() ?? '—'}</div>
-              <div style="color: var(--color-accent2);">Players: ${d.players?.toLocaleString() ?? '—'}</div>
+              <div style="color: var(--color-accent2);">Unique Players: ${d.players?.toLocaleString() ?? '—'}</div>
             `)
 
           // Position tooltip on left side if near right edge
@@ -298,48 +328,252 @@ export function HomePage() {
       .attr('font-size', '12px')
       .text('Unique Players')
 
-    // Legend
-    const legend = g.append('g').attr('transform', `translate(${innerWidth - 180}, 0)`)
+    // Patch version lines (only major patches: A.BC or A.BC_ format, not A.BCa)
+    const majorPatchRegex = /^\d+\.\d{2}_?$/
+    const majorPatches = patches.filter(p => majorPatchRegex.test(p.name))
+    const xDomain = xScale.domain()
+    majorPatches.forEach((patch, idx) => {
+      const patchDate = patch.firstMatchDate
+      if (patchDate >= xDomain[0] && patchDate <= xDomain[1]) {
+        const x = xScale(patchDate)
 
-    legend
-      .append('rect')
-      .attr('x', 0)
-      .attr('y', 0)
-      .attr('width', 16)
-      .attr('height', 12)
-      .attr('fill', 'var(--color-accent)')
-      .attr('opacity', 0.6)
+        // Vertical line
+        g.append('line')
+          .attr('x1', x)
+          .attr('x2', x)
+          .attr('y1', 0)
+          .attr('y2', innerHeight)
+          .attr('stroke', 'var(--color-text-muted)')
+          .attr('stroke-width', 1)
+          .attr('stroke-dasharray', '2,2')
+          .attr('opacity', 0.5)
 
-    legend
-      .append('text')
-      .attr('x', 22)
-      .attr('y', 10)
-      .attr('fill', 'var(--color-text-muted)')
-      .attr('font-size', '11px')
-      .text('Games/week')
-
-    legend
-      .append('line')
-      .attr('x1', 0)
-      .attr('y1', 26)
-      .attr('x2', 16)
-      .attr('y2', 26)
-      .attr('stroke', 'var(--color-accent2)')
-      .attr('stroke-width', 2)
-
-    legend
-      .append('text')
-      .attr('x', 22)
-      .attr('y', 30)
-      .attr('fill', 'var(--color-text-muted)')
-      .attr('font-size', '11px')
-      .text('Players/week')
+        // Patch label (alternating y positions to avoid overlap)
+        const yOffset = (idx % 3) * 12 + 10
+        g.append('text')
+          .attr('x', x + 3)
+          .attr('y', yOffset)
+          .attr('fill', 'var(--color-text-muted)')
+          .attr('font-size', '9px')
+          .text(patch.name)
+      }
+    })
 
     // Cleanup tooltip on unmount
     return () => {
       tooltip.remove()
     }
-  }, [chartData])
+  }, [chartData, patches])
+
+  // Patch statistics chart
+  useEffect(() => {
+    if (!patchChartRef.current || !patches.length) return
+
+    // Filter to only major patches with valid data for this chart
+    const majorPatchRegex = /^\d+\.\d{2}[a_]?$/
+    const validPatches = patches.filter(p =>
+      majorPatchRegex.test(p.name) &&
+      typeof p.totalGames === 'number' && p.totalGames > 0 &&
+      typeof p.avgDuration === 'number' && p.avgDuration > 0
+    )
+
+    if (!validPatches.length) return
+
+    const svg = d3.select(patchChartRef.current)
+    svg.selectAll('*').remove()
+
+    const containerWidth = patchChartRef.current.parentElement?.clientWidth ?? 1300
+    const width = Math.min(containerWidth - 32, 1250)
+    const height = 300
+    const margin = { top: 20, right: 60, bottom: 80, left: 60 }
+    const innerWidth = width - margin.left - margin.right
+    const innerHeight = height - margin.top - margin.bottom
+
+    svg.attr('width', width).attr('height', height)
+
+    const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`)
+
+    // Format seconds as mm:ss
+    const formatDuration = (seconds: number) => {
+      const mins = Math.floor(seconds / 60)
+      const secs = Math.floor(seconds % 60)
+      return `${mins}:${secs.toString().padStart(2, '0')}`
+    }
+
+    // X scale (categorical - patch names)
+    const xScale = d3
+      .scaleBand()
+      .domain(validPatches.map(p => p.name))
+      .range([0, innerWidth])
+      .padding(0.2)
+
+    // Y scales
+    const durationExtent = d3.extent(validPatches, p => p.avgDuration) as [number, number]
+    const yDurationScale = d3.scaleLinear()
+      .domain([durationExtent[0] * 0.95, durationExtent[1] * 1.05])
+      .range([innerHeight, 0])
+
+    const yWinrateScale = d3.scaleLinear().domain([45, 55]).range([innerHeight, 0])
+
+    // Create tooltip
+    const tooltip = d3.select(patchChartRef.current.parentElement)
+      .append('div')
+      .attr('class', 'chart-tooltip')
+      .style('position', 'absolute')
+      .style('visibility', 'hidden')
+      .style('background', 'var(--color-bg-elevated)')
+      .style('border', '1px solid var(--color-border)')
+      .style('border-radius', '4px')
+      .style('padding', '8px 12px')
+      .style('font-size', '12px')
+      .style('pointer-events', 'none')
+      .style('z-index', '10')
+
+    // Draw bars for duration
+    g.selectAll('.bar')
+      .data(validPatches)
+      .enter()
+      .append('rect')
+      .attr('class', 'bar')
+      .attr('x', d => xScale(d.name)!)
+      .attr('y', d => yDurationScale(d.avgDuration))
+      .attr('width', xScale.bandwidth())
+      .attr('height', d => innerHeight - yDurationScale(d.avgDuration))
+      .attr('fill', 'var(--color-accent)')
+      .attr('opacity', 0.6)
+
+    // 50% reference line
+    const y50 = yWinrateScale(50)
+    g.append('line')
+      .attr('x1', 0)
+      .attr('x2', innerWidth)
+      .attr('y1', y50)
+      .attr('y2', y50)
+      .attr('stroke', 'var(--color-text-muted)')
+      .attr('stroke-width', 1)
+      .attr('stroke-dasharray', '4,4')
+      .attr('opacity', 0.5)
+
+    // Draw line for radiant winrate
+    const line = d3
+      .line<typeof validPatches[0]>()
+      .x(d => xScale(d.name)! + xScale.bandwidth() / 2)
+      .y(d => yWinrateScale(d.radiantWinrate))
+      .curve(d3.curveMonotoneX)
+
+    g.append('path')
+      .datum(validPatches)
+      .attr('fill', 'none')
+      .attr('stroke', 'var(--color-accent2)')
+      .attr('stroke-width', 2)
+      .attr('d', line)
+
+    // Winrate dots
+    g.selectAll('.winrate-dot')
+      .data(validPatches)
+      .enter()
+      .append('circle')
+      .attr('class', 'winrate-dot')
+      .attr('cx', d => xScale(d.name)! + xScale.bandwidth() / 2)
+      .attr('cy', d => yWinrateScale(d.radiantWinrate))
+      .attr('r', 4)
+      .attr('fill', 'var(--color-accent2)')
+
+    // Hover overlay
+    g.append('rect')
+      .attr('class', 'overlay')
+      .attr('width', innerWidth)
+      .attr('height', innerHeight)
+      .attr('fill', 'none')
+      .attr('pointer-events', 'all')
+      .on('mousemove', function(event) {
+        const [mx] = d3.pointer(event)
+
+        // Find which patch band we're in
+        const patchIndex = Math.floor(mx / (innerWidth / validPatches.length))
+        const closest = validPatches[Math.min(Math.max(0, patchIndex), validPatches.length - 1)]
+
+        if (closest) {
+          tooltip
+            .style('visibility', 'visible')
+            .html(`
+              <div style="color: var(--color-text); margin-bottom: 4px; font-weight: bold;">${closest.name}</div>
+              <div style="color: var(--color-accent);">Avg Duration: ${formatDuration(closest.avgDuration)}</div>
+              <div style="color: var(--color-accent2);">Radiant WR: ${closest.radiantWinrate.toFixed(1)}%</div>
+              <div style="color: var(--color-text-muted);">Games: ${closest.totalGames.toLocaleString()}</div>
+            `)
+
+          const tooltipWidth = 160
+          const isNearRightEdge = event.offsetX > width - tooltipWidth - 50
+          tooltip
+            .style('left', isNearRightEdge ? `${event.offsetX - tooltipWidth - 15}px` : `${event.offsetX + 15}px`)
+            .style('top', `${event.offsetY - 10}px`)
+        }
+      })
+      .on('mouseleave', function() {
+        tooltip.style('visibility', 'hidden')
+      })
+
+    // X axis
+    const xAxis = d3.axisBottom(xScale)
+
+    g.append('g')
+      .attr('transform', `translate(0,${innerHeight})`)
+      .call(xAxis)
+      .attr('color', 'var(--color-text-muted)')
+      .selectAll('text')
+      .attr('fill', 'var(--color-text-muted)')
+      .attr('transform', 'rotate(-45)')
+      .attr('text-anchor', 'end')
+      .attr('dx', '-0.5em')
+      .attr('dy', '0.5em')
+      .attr('font-size', '10px')
+
+    // Left Y axis (duration)
+    const yDurationAxis = d3.axisLeft(yDurationScale)
+      .ticks(5)
+      .tickFormat(d => formatDuration(d as number))
+
+    g.append('g')
+      .call(yDurationAxis)
+      .attr('color', 'var(--color-text-muted)')
+      .selectAll('text')
+      .attr('fill', 'var(--color-accent)')
+
+    // Right Y axis (winrate)
+    const yWinrateAxis = d3.axisRight(yWinrateScale).ticks(5).tickFormat(d => `${d}%`)
+
+    g.append('g')
+      .attr('transform', `translate(${innerWidth},0)`)
+      .call(yWinrateAxis)
+      .attr('color', 'var(--color-text-muted)')
+      .selectAll('text')
+      .attr('fill', 'var(--color-accent2)')
+
+    // Axis labels
+    g.append('text')
+      .attr('transform', 'rotate(-90)')
+      .attr('y', -45)
+      .attr('x', -innerHeight / 2)
+      .attr('text-anchor', 'middle')
+      .attr('fill', 'var(--color-accent)')
+      .attr('font-size', '12px')
+      .text('Avg Duration')
+
+    g.append('text')
+      .attr('transform', 'rotate(90)')
+      .attr('y', -innerWidth - 45)
+      .attr('x', innerHeight / 2)
+      .attr('text-anchor', 'middle')
+      .attr('fill', 'var(--color-accent2)')
+      .attr('font-size', '12px')
+      .text('Radiant Win %')
+
+    // Cleanup tooltip on unmount
+    return () => {
+      tooltip.remove()
+    }
+  }, [patches])
 
   return (
     <PageShell>
@@ -347,7 +581,7 @@ export function HomePage() {
         <h1 className={styles.title}>WINDRUN</h1>
         <p className={styles.tagline}>Ability Draft Statistics</p>
         <p className={styles.subtitle}>
-          Comprehensive data from hundreds of thousands of Dota 2 Ability Draft matches.
+          Comprehensive data from {stats ? stats.totalGames.toLocaleString() : 'hundreds of thousands of'} Dota 2 Ability Draft matches.
           <br />
           Hero win rates, ability synergies, player leaderboards, and match analysis.
         </p>
@@ -364,20 +598,11 @@ export function HomePage() {
         )}
       </div>
 
-      {stats && (
-        <div className={styles.statsGrid}>
-          <div className={styles.statCard}>
-            <span className={styles.statValue}>{stats.totalGames.toLocaleString()}</span>
-            <span className={styles.statLabel}>Total Games Tracked</span>
-          </div>
-          <div className={styles.statCard}>
-            <span className={styles.statValue}>{stats.latestPlayers.toLocaleString()}</span>
-            <span className={styles.statLabel}>Unique Players This Week</span>
-          </div>
-          <div className={styles.statCard}>
-            <span className={styles.statValue}>{stats.recentGames.toLocaleString()}</span>
-            <span className={styles.statLabel}>Games In Last 30 Days</span>
-          </div>
+      {/* Patch Statistics Chart */}
+      {patches.length > 0 && (
+        <div className={styles.chartContainer}>
+          <h2 className={styles.chartTitle}>Average Duration & Radiant Win Rate by Patch</h2>
+          <svg ref={patchChartRef} className={styles.chart} />
         </div>
       )}
 

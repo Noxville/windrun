@@ -7,7 +7,7 @@ interface NavItem {
   label: string
   href?: string
   onClick?: () => void
-  children?: { label: string; href: string; description?: string }[]
+  children?: { label: string; href: string; description?: string; isNew?: boolean }[]
 }
 
 const NAV_ITEMS: NavItem[] = [
@@ -23,7 +23,8 @@ const NAV_ITEMS: NavItem[] = [
     label: 'Abilities',
     children: [
       { label: 'All Abilities', href: '/abilities', description: 'Stats & valuations' },
-      { label: 'Tier List', href: '/abilities/tiers', description: 'Visual tier ranking' },
+      { label: 'By Time', href: '/abilities/by-time', description: 'Win rates by duration', isNew: true },
+      { label: 'Tier List', href: '/abilities/tiers', description: 'Visual tier ranking', isNew: true },
       { label: 'Ability Pairs', href: '/ability-pairs', description: 'Synergy combinations' },
       { label: 'High Skill', href: '/ability-high-skill', description: 'High MMR analysis' },
       { label: 'By Hero', href: '/ability-by-hero', description: 'Grouped by origin' },
@@ -146,7 +147,10 @@ export function Navigation() {
                       to={child.href}
                       className={`${styles.dropdownItem} ${isDropdownItemActive(child.href, item.children!) ? styles.dropdownItemActive : ''}`}
                     >
-                      <span className={styles.dropdownLabel}>{child.label}</span>
+                      <span className={styles.dropdownLabel}>
+                        {child.label}
+                        {child.isNew && <span className={styles.newBadge}>new</span>}
+                      </span>
                       {child.description && (
                         <span className={styles.dropdownDesc}>{child.description}</span>
                       )}

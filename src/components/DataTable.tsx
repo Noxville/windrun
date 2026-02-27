@@ -55,7 +55,10 @@ function VirtualTableRowInner<T>({
 
 const VirtualTableRow = memo(
   VirtualTableRowInner,
-  (prev, next) => prev.index === next.index && prev.rowId === next.rowId
+  (prev, next) =>
+    prev.index === next.index &&
+    prev.rowId === next.rowId &&
+    prev.row.original === next.row.original
 ) as typeof VirtualTableRowInner
 
 interface DataTableProps<T> {

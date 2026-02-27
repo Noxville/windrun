@@ -178,6 +178,20 @@
   color: var(--color-text-muted);
 }
 
+.newBadge {
+  display: inline-block;
+  margin-left: 0.4rem;
+  padding: 0.1rem 0.35rem;
+  font-size: 0.6rem;
+  font-weight: var(--weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-bg);
+  background: var(--color-accent);
+  border-radius: var(--radius-sm);
+  vertical-align: middle;
+}
+
 /* ============================================
    AUTH
    ============================================ */
