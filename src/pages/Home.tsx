@@ -369,10 +369,8 @@ export function HomePage() {
   useEffect(() => {
     if (!patchChartRef.current || !patches.length) return
 
-    // Filter to only major patches with valid data for this chart
-    const majorPatchRegex = /^\d+\.\d{2}[a_]?$/
+    // Filter to patches with valid data for this chart
     const validPatches = patches.filter(p =>
-      majorPatchRegex.test(p.name) &&
       typeof p.totalGames === 'number' && p.totalGames > 0 &&
       typeof p.avgDuration === 'number' && p.avgDuration > 0
     )
