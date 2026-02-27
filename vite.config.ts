@@ -6,6 +6,20 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('d3')) return 'vendor-d3'
+            if (id.includes('react') || id.includes('@tanstack')) return 'vendor-react'
+            return 'vendor'
+          }
+          if (id.includes('/data/abilities') || id.includes('/data/heroes')) {
+            return 'static-data'
+          }
+        },
+      },
+    },
   },
   server: {
     port: 3000,
