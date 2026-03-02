@@ -16,262 +16,264 @@ const OUTPUT_DIR = path.join(__dirname, '../src/data');
 // Hero attributes and attack types (Dota 2 standard data)
 // str = Strength, agi = Agility, int = Intelligence, uni = Universal
 const HERO_ATTRIBUTES = {
-  1: 'agi', // Anti-Mage
-  2: 'str', // Axe
-  3: 'uni', // Bane
-  4: 'agi', // Bloodseeker
-  5: 'uni', // Crystal Maiden
-  6: 'agi', // Drow Ranger
-  7: 'str', // Earthshaker
-  8: 'agi', // Juggernaut
-  9: 'uni', // Mirana
-  10: 'agi', // Morphling
-  11: 'agi', // Shadow Fiend
-  12: 'agi', // Phantom Lancer
-  13: 'uni', // Puck
-  14: 'str', // Pudge
-  15: 'agi', // Razor
-  16: 'str', // Sand King
-  17: 'int', // Storm Spirit
-  18: 'str', // Sven
-  19: 'str', // Tiny
-  20: 'uni', // Vengeful Spirit
-  21: 'int', // Windrunner
-  22: 'int', // Zeus
-  23: 'str', // Kunkka
-  25: 'int', // Lina
-  26: 'agi', // Lion (actually int but Lion is int)
-  27: 'int', // Shadow Shaman
-  28: 'int', // Slardar (actually str)
-  29: 'str', // Tidehunter
-  30: 'int', // Witch Doctor
-  31: 'int', // Lich
-  32: 'int', // Riki (actually agi)
-  33: 'int', // Enigma
-  34: 'int', // Tinker
-  35: 'agi', // Sniper
-  36: 'int', // Necrophos
-  37: 'int', // Warlock
-  38: 'str', // Beastmaster
-  39: 'int', // Queen of Pain
-  40: 'agi', // Venomancer
-  41: 'agi', // Faceless Void
-  42: 'str', // Wraith King
-  43: 'int', // Death Prophet
-  44: 'agi', // Phantom Assassin
-  45: 'int', // Pugna
-  46: 'agi', // Templar Assassin
-  47: 'agi', // Viper
-  48: 'agi', // Luna
-  49: 'str', // Dragon Knight
-  50: 'int', // Dazzle
-  51: 'str', // Clockwerk
-  52: 'int', // Leshrac
-  53: 'int', // Nature\'s Prophet
-  54: 'str', // Lifestealer
-  55: 'int', // Dark Seer
-  56: 'agi', // Clinkz
-  57: 'str', // Omniknight
-  58: 'int', // Enchantress
-  59: 'str', // Huskar
-  60: 'str', // Night Stalker
-  61: 'agi', // Broodmother
-  62: 'agi', // Bounty Hunter
-  63: 'agi', // Weaver
-  64: 'int', // Jakiro
-  65: 'str', // Batrider
-  66: 'int', // Chen
-  67: 'int', // Spectre (actually agi)
-  68: 'int', // Ancient Apparition
-  69: 'uni', // Doom
-  70: 'agi', // Ursa
-  71: 'str', // Spirit Breaker
-  72: 'agi', // Gyrocopter
-  73: 'agi', // Alchemist
-  74: 'int', // Invoker
-  75: 'int', // Silencer
-  76: 'int', // Outworld Destroyer
-  77: 'str', // Lycan
-  78: 'str', // Brewmaster
-  79: 'int', // Shadow Demon
-  80: 'agi', // Lone Druid
-  81: 'str', // Chaos Knight
-  82: 'agi', // Meepo
-  83: 'str', // Treant Protector
-  84: 'int', // Ogre Magi
-  85: 'str', // Undying
-  86: 'int', // Rubick
-  87: 'int', // Disruptor
-  88: 'agi', // Nyx Assassin
-  89: 'agi', // Naga Siren
-  90: 'int', // Keeper of the Light
-  91: 'int', // Io
-  92: 'int', // Visage
-  93: 'agi', // Slark
-  94: 'agi', // Medusa
-  95: 'agi', // Troll Warlord
-  96: 'str', // Centaur Warrunner
-  97: 'str', // Magnus
-  98: 'str', // Timbersaw
-  99: 'str', // Bristleback
-  100: 'str', // Tusk
-  101: 'int', // Skywrath Mage
-  102: 'str', // Abaddon
-  103: 'str', // Elder Titan
-  104: 'str', // Legion Commander
-  105: 'agi', // Techies (now agi)
-  106: 'agi', // Ember Spirit
-  107: 'str', // Earth Spirit
-  108: 'agi', // Underlord (actually str)
-  109: 'agi', // Terrorblade
-  110: 'str', // Phoenix
-  111: 'int', // Oracle
-  112: 'int', // Winter Wyvern
-  113: 'str', // Arc Warden (actually agi)
-  114: 'agi', // Monkey King
-  119: 'int', // Dark Willow
-  120: 'str', // Pangolier
-  121: 'int', // Grimstroke
-  123: 'agi', // Hoodwink
-  126: 'str', // Void Spirit
-  128: 'int', // Snapfire
-  129: 'str', // Mars
-  131: 'int', // Dawnbreaker (actually str)
-  132: 'int', // Marci (actually str)
-  133: 'int', // Primal Beast
-  134: 'int', // Muerta
-  135: 'uni', // Ringmaster
-  136: 'uni', // Kez
+    1: "agi", // Anti-Mage
+    2: "str", // Axe
+    3: "uni", // Bane
+    4: "agi", // Bloodseeker
+    5: "int", // Crystal Maiden
+    6: "agi", // Drow Ranger
+    7: "str", // Earthshaker
+    8: "agi", // Juggernaut
+    9: "agi", // Mirana
+    11: "agi", // Shadow Fiend
+    10: "agi", // Morphling
+    12: "agi", // Phantom Lancer
+    13: "int", // Puck
+    14: "str", // Pudge
+    15: "agi", // Razor
+    16: "uni", // Sand King
+    17: "int", // Storm Spirit
+    18: "str", // Sven
+    19: "str", // Tiny
+    20: "agi", // Vengeful Spirit
+    21: "uni", // Windranger
+    22: "int", // Zeus
+    23: "str", // Kunkka
+    25: "int", // Lina
+    31: "int", // Lich
+    26: "int", // Lion
+    27: "int", // Shadow Shaman
+    28: "str", // Slardar
+    29: "str", // Tidehunter
+    30: "int", // Witch Doctor
+    32: "agi", // Riki
+    33: "uni", // Enigma
+    34: "int", // Tinker
+    35: "agi", // Sniper
+    36: "int", // Necrophos
+    37: "int", // Warlock
+    38: "uni", // Beastmaster
+    39: "int", // Queen of Pain
+    40: "uni", // Venomancer
+    41: "agi", // Faceless Void
+    42: "str", // Wraith King
+    43: "uni", // Death Prophet
+    44: "agi", // Phantom Assassin
+    45: "int", // Pugna
+    46: "agi", // Templar Assassin
+    47: "agi", // Viper
+    48: "agi", // Luna
+    49: "str", // Dragon Knight
+    50: "uni", // Dazzle
+    51: "str", // Clockwerk
+    52: "int", // Leshrac
+    53: "uni", // Nature's Prophet
+    54: "str", // Lifestealer
+    55: "int", // Dark Seer
+    56: "agi", // Clinkz
+    57: "str", // Omniknight
+    58: "int", // Enchantress
+    59: "str", // Huskar
+    60: "str", // Night Stalker
+    61: "agi", // Broodmother
+    62: "agi", // Bounty Hunter
+    63: "agi", // Weaver
+    64: "int", // Jakiro
+    65: "uni", // Batrider
+    66: "int", // Chen
+    67: "agi", // Spectre
+    69: "str", // Doom
+    68: "int", // Ancient Apparition
+    70: "agi", // Ursa
+    71: "str", // Spirit Breaker
+    72: "agi", // Gyrocopter
+    73: "str", // Alchemist
+    74: "int", // Invoker
+    75: "int", // Silencer
+    76: "int", // Outworld Destroyer
+    77: "str", // Lycan
+    78: "uni", // Brewmaster
+    79: "int", // Shadow Demon
+    80: "agi", // Lone Druid
+    81: "str", // Chaos Knight
+    82: "agi", // Meepo
+    83: "str", // Treant Protector
+    84: "str", // Ogre Magi
+    85: "str", // Undying
+    86: "int", // Rubick
+    87: "int", // Disruptor
+    88: "uni", // Nyx Assassin
+    89: "agi", // Naga Siren
+    90: "int", // Keeper of the Light
+    91: "uni", // Io
+    92: "uni", // Visage
+    93: "agi", // Slark
+    94: "agi", // Medusa
+    95: "agi", // Troll Warlord
+    96: "str", // Centaur Warrunner
+    97: "uni", // Magnus
+    98: "str", // Timbersaw
+    99: "str", // Bristleback
+    100: "str", // Tusk
+    101: "int", // Skywrath Mage
+    102: "uni", // Abaddon
+    103: "str", // Elder Titan
+    104: "str", // Legion Commander
+    106: "agi", // Ember Spirit
+    107: "str", // Earth Spirit
+    109: "agi", // Terrorblade
+    110: "str", // Phoenix
+    111: "int", // Oracle
+    105: "uni", // Techies
+    112: "int", // Winter Wyvern
+    113: "uni", // Arc Warden
+    108: "str", // Underlord
+    114: "agi", // Monkey King
+    120: "uni", // Pangolier
+    119: "int", // Dark Willow
+    121: "int", // Grimstroke
+    129: "str", // Mars
+    126: "uni", // Void Spirit
+    128: "uni", // Snapfire
+    123: "agi", // Hoodwink
+    135: "str", // Dawnbreaker
+    136: "uni", // Marci
+    137: "str", // Primal Beast
+    138: "int", // Muerta
+    131: "int", // Ringmaster
+    145: "agi", // Kez
+    155: "str", // Largo
 };
 
 // Attack types: melee or ranged
 const HERO_ATTACK_TYPES = {
-  1: 'melee', // Anti-Mage
-  2: 'melee', // Axe
-  3: 'ranged', // Bane
-  4: 'melee', // Bloodseeker
-  5: 'ranged', // Crystal Maiden
-  6: 'ranged', // Drow Ranger
-  7: 'melee', // Earthshaker
-  8: 'melee', // Juggernaut
-  9: 'ranged', // Mirana
-  10: 'ranged', // Morphling
-  11: 'ranged', // Shadow Fiend
-  12: 'melee', // Phantom Lancer
-  13: 'ranged', // Puck
-  14: 'melee', // Pudge
-  15: 'ranged', // Razor
-  16: 'melee', // Sand King
-  17: 'ranged', // Storm Spirit
-  18: 'melee', // Sven
-  19: 'melee', // Tiny
-  20: 'ranged', // Vengeful Spirit
-  21: 'ranged', // Windrunner
-  22: 'ranged', // Zeus
-  23: 'melee', // Kunkka
-  25: 'ranged', // Lina
-  26: 'ranged', // Lion
-  27: 'ranged', // Shadow Shaman
-  28: 'melee', // Slardar
-  29: 'melee', // Tidehunter
-  30: 'ranged', // Witch Doctor
-  31: 'ranged', // Lich
-  32: 'melee', // Riki
-  33: 'ranged', // Enigma
-  34: 'ranged', // Tinker
-  35: 'ranged', // Sniper
-  36: 'ranged', // Necrophos
-  37: 'ranged', // Warlock
-  38: 'melee', // Beastmaster
-  39: 'ranged', // Queen of Pain
-  40: 'ranged', // Venomancer
-  41: 'melee', // Faceless Void
-  42: 'melee', // Wraith King
-  43: 'ranged', // Death Prophet
-  44: 'melee', // Phantom Assassin
-  45: 'ranged', // Pugna
-  46: 'ranged', // Templar Assassin
-  47: 'ranged', // Viper
-  48: 'ranged', // Luna
-  49: 'melee', // Dragon Knight
-  50: 'ranged', // Dazzle
-  51: 'melee', // Clockwerk
-  52: 'ranged', // Leshrac
-  53: 'ranged', // Nature\'s Prophet
-  54: 'melee', // Lifestealer
-  55: 'melee', // Dark Seer
-  56: 'ranged', // Clinkz
-  57: 'melee', // Omniknight
-  58: 'ranged', // Enchantress
-  59: 'ranged', // Huskar
-  60: 'melee', // Night Stalker
-  61: 'melee', // Broodmother
-  62: 'melee', // Bounty Hunter
-  63: 'ranged', // Weaver
-  64: 'ranged', // Jakiro
-  65: 'melee', // Batrider
-  66: 'ranged', // Chen
-  67: 'melee', // Spectre
-  68: 'ranged', // Ancient Apparition
-  69: 'melee', // Doom
-  70: 'melee', // Ursa
-  71: 'melee', // Spirit Breaker
-  72: 'ranged', // Gyrocopter
-  73: 'melee', // Alchemist
-  74: 'ranged', // Invoker
-  75: 'ranged', // Silencer
-  76: 'ranged', // Outworld Destroyer
-  77: 'melee', // Lycan
-  78: 'melee', // Brewmaster
-  79: 'ranged', // Shadow Demon
-  80: 'ranged', // Lone Druid
-  81: 'melee', // Chaos Knight
-  82: 'melee', // Meepo
-  83: 'melee', // Treant Protector
-  84: 'melee', // Ogre Magi
-  85: 'melee', // Undying
-  86: 'ranged', // Rubick
-  87: 'ranged', // Disruptor
-  88: 'melee', // Nyx Assassin
-  89: 'melee', // Naga Siren
-  90: 'ranged', // Keeper of the Light
-  91: 'ranged', // Io
-  92: 'ranged', // Visage
-  93: 'melee', // Slark
-  94: 'ranged', // Medusa
-  95: 'melee', // Troll Warlord
-  96: 'melee', // Centaur Warrunner
-  97: 'melee', // Magnus
-  98: 'melee', // Timbersaw
-  99: 'melee', // Bristleback
-  100: 'melee', // Tusk
-  101: 'ranged', // Skywrath Mage
-  102: 'melee', // Abaddon
-  103: 'melee', // Elder Titan
-  104: 'melee', // Legion Commander
-  105: 'ranged', // Techies
-  106: 'melee', // Ember Spirit
-  107: 'melee', // Earth Spirit
-  108: 'melee', // Underlord
-  109: 'melee', // Terrorblade
-  110: 'ranged', // Phoenix
-  111: 'ranged', // Oracle
-  112: 'ranged', // Winter Wyvern
-  113: 'ranged', // Arc Warden
-  114: 'melee', // Monkey King
-  119: 'ranged', // Dark Willow
-  120: 'melee', // Pangolier
-  121: 'ranged', // Grimstroke
-  123: 'ranged', // Hoodwink
-  126: 'melee', // Void Spirit
-  128: 'ranged', // Snapfire
-  129: 'melee', // Mars
-  131: 'melee', // Dawnbreaker
-  132: 'melee', // Marci
-  133: 'melee', // Primal Beast
-  134: 'ranged', // Muerta
-  135: 'ranged', // Ringmaster
-  136: 'melee', // Kez
+    1: "melee", // Anti-Mage
+    2: "melee", // Axe
+    3: "", // Bane
+    4: "melee", // Bloodseeker
+    5: "ranged", // Crystal Maiden
+    6: "ranged", // Drow Ranger
+    7: "melee", // Earthshaker
+    8: "melee", // Juggernaut
+    9: "ranged", // Mirana
+    11: "ranged", // Shadow Fiend
+    10: "ranged", // Morphling
+    12: "melee", // Phantom Lancer
+    13: "ranged", // Puck
+    14: "melee", // Pudge
+    15: "ranged", // Razor
+    16: "melee", // Sand King
+    17: "ranged", // Storm Spirit
+    18: "melee", // Sven
+    19: "melee", // Tiny
+    20: "ranged", // Vengeful Spirit
+    21: "ranged", // Windranger
+    22: "ranged", // Zeus
+    23: "melee", // Kunkka
+    25: "ranged", // Lina
+    31: "ranged", // Lich
+    26: "ranged", // Lion
+    27: "ranged", // Shadow Shaman
+    28: "melee", // Slardar
+    29: "melee", // Tidehunter
+    30: "ranged", // Witch Doctor
+    32: "melee", // Riki
+    33: "ranged", // Enigma
+    34: "ranged", // Tinker
+    35: "ranged", // Sniper
+    36: "ranged", // Necrophos
+    37: "ranged", // Warlock
+    38: "melee", // Beastmaster
+    39: "ranged", // Queen of Pain
+    40: "ranged", // Venomancer
+    41: "melee", // Faceless Void
+    42: "melee", // Wraith King
+    43: "ranged", // Death Prophet
+    44: "melee", // Phantom Assassin
+    45: "ranged", // Pugna
+    46: "ranged", // Templar Assassin
+    47: "ranged", // Viper
+    48: "ranged", // Luna
+    49: "melee", // Dragon Knight
+    50: "ranged", // Dazzle
+    51: "melee", // Clockwerk
+    52: "ranged", // Leshrac
+    53: "ranged", // Nature's Prophet
+    54: "melee", // Lifestealer
+    55: "melee", // Dark Seer
+    56: "ranged", // Clinkz
+    57: "melee", // Omniknight
+    58: "ranged", // Enchantress
+    59: "ranged", // Huskar
+    60: "melee", // Night Stalker
+    61: "melee", // Broodmother
+    62: "melee", // Bounty Hunter
+    63: "ranged", // Weaver
+    64: "ranged", // Jakiro
+    65: "ranged", // Batrider
+    66: "ranged", // Chen
+    67: "melee", // Spectre
+    69: "melee", // Doom
+    68: "ranged", // Ancient Apparition
+    70: "melee", // Ursa
+    71: "melee", // Spirit Breaker
+    72: "ranged", // Gyrocopter
+    73: "melee", // Alchemist
+    74: "ranged", // Invoker
+    75: "ranged", // Silencer
+    76: "ranged", // Outworld Destroyer
+    77: "melee", // Lycan
+    78: "melee", // Brewmaster
+    79: "ranged", // Shadow Demon
+    80: "ranged", // Lone Druid
+    81: "melee", // Chaos Knight
+    82: "melee", // Meepo
+    83: "melee", // Treant Protector
+    84: "melee", // Ogre Magi
+    85: "melee", // Undying
+    86: "ranged", // Rubick
+    87: "ranged", // Disruptor
+    88: "melee", // Nyx Assassin
+    89: "melee", // Naga Siren
+    90: "ranged", // Keeper of the Light
+    91: "ranged", // Io
+    92: "ranged", // Visage
+    93: "melee", // Slark
+    94: "ranged", // Medusa
+    95: "ranged", // Troll Warlord
+    96: "melee", // Centaur Warrunner
+    97: "melee", // Magnus
+    98: "melee", // Timbersaw
+    99: "melee", // Bristleback
+    100: "melee", // Tusk
+    101: "ranged", // Skywrath Mage
+    102: "melee", // Abaddon
+    103: "melee", // Elder Titan
+    104: "melee", // Legion Commander
+    106: "melee", // Ember Spirit
+    107: "melee", // Earth Spirit
+    109: "melee", // Terrorblade
+    110: "ranged", // Phoenix
+    111: "ranged", // Oracle
+    105: "ranged", // Techies
+    112: "ranged", // Winter Wyvern
+    113: "ranged", // Arc Warden
+    108: "melee", // Underlord
+    114: "melee", // Monkey King
+    120: "melee", // Pangolier
+    119: "ranged", // Dark Willow
+    121: "ranged", // Grimstroke
+    129: "melee", // Mars
+    126: "melee", // Void Spirit
+    128: "ranged", // Snapfire
+    123: "ranged", // Hoodwink
+    135: "melee", // Dawnbreaker
+    136: "melee", // Marci
+    137: "melee", // Primal Beast
+    138: "ranged", // Muerta
+    131: "ranged", // Ringmaster
+    145: "melee", // Kez
+    155: "melee", // Largo
 };
 
 async function fetchJson(url) {
