@@ -779,6 +779,33 @@
   border-color: var(--color-accent2);
 }
 
+.builderLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  align-self: center;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg);
+  color: var(--color-text-muted);
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+  text-decoration: none;
+}
+
+.builderLink:hover {
+  color: var(--color-text);
+  border-color: var(--color-text-muted);
+  background: var(--color-bg-elevated);
+}
+
+.builderIcon {
+  width: 14px;
+  height: 14px;
+}
+
 .matchMeta {
   display: flex;
   align-items: center;

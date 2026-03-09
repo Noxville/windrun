@@ -17,6 +17,7 @@ interface AbilityStatEntry {
   winrate: number
   pickRate: number
   avgPickPosition: number
+  ignored?: number
 }
 
 interface AbilitiesApiResponse {
@@ -357,6 +358,383 @@ function computeShiftExtremes(
   return { min, max }
 }
 
+// --- Build availability computation ---
+
+const AVAILABILITY_THRESHOLD = 100
+
+/** Binomial coefficient C(n, k) */
+function comb(n: number, k: number): number {
+  if (k < 0 || k > n) return 0
+  if (k === 0 || k === n) return 1
+  const j = Math.min(k, n - k)
+  let result = 1
+  for (let i = 0; i < j; i++) {
+    result = result * (n - i) / (i + 1)
+  }
+  return result
+}
+
+/** For each hero in the patch, track which spells and ultimates they bring to the pool */
+interface HeroAbilityPool {
+  heroId: number
+  spells: number[]    // eligible non-ultimate ability IDs (numPicks + ignored >= threshold)
+  ultimates: number[] // eligible ultimate ability IDs
+}
+
+/** A step in the availability breakdown shown to the user */
+interface AvailabilityStep {
+  label: string       // e.g. "Mirana (body)" or "Sacred Arrow + Starstorm"
+  detail: string      // e.g. "12 / 127 = 9.45%" or "same hero, all 3 spells included"
+  subDetail?: string  // e.g. "primary 8.66% + filler 0.04%"
+}
+
+interface AvailabilityResult {
+  probability: number
+  heroesAvailable: number
+  steps: AvailabilityStep[]
+}
+
+/**
+ * Compute the probability that a given build is available in a random draft.
+ *
+ * Draft mechanics (per game):
+ *   1. 12 heroes are randomly chosen from N available heroes.
+ *   2. For each chosen hero, all eligible ultimates are auto-added.
+ *      If a hero has 0 eligible ultimates, 1 random ultimate from the global pool is added.
+ *   3. For each chosen hero, 3 non-ultimate abilities are added:
+ *      - If hero has exactly 3 eligible spells → all 3 added.
+ *      - If hero has > 3 eligible spells → 3 randomly chosen.
+ *      - If hero has < 3 eligible spells → all added, rest filled with random spells from the global pool.
+ *
+ * Calculation approach:
+ *   - The body hero must always be drafted (no filler path for hero bodies).
+ *   - Non-body abilities are grouped by their owner hero. For each group, the abilities
+ *     can appear via "primary" (owner hero drafted, abilities selected from their pool)
+ *     or via "filler" (owner hero NOT drafted, abilities drawn as fillers by other heroes).
+ *   - We enumerate all 2^G combinations (primary vs filler per group, G ≤ 4) and sum
+ *     the exact probability for each scenario.
+ *   - Filler probability per ability is approximate: expectedFillerSlots / totalPoolSize.
+ */
+function computeBuildAvailability(
+  build: BuildSlot[],
+  abilityStatsMap: Map<number, AbilityStatEntry>,
+): AvailabilityResult | null {
+  const filledSlots = build.filter(s => s.abilityId !== null)
+  if (filledSlots.length === 0) return null
+
+  const steps: AvailabilityStep[] = []
+
+  // ─── Step 1: Build hero ability pools ─────────────────────────────────────
+  // A hero is "available" if its body (negative abilityId) has numPicks + ignored >= threshold.
+  const heroPools = new Map<number, HeroAbilityPool>()
+
+  abilityStatsMap.forEach((stat, id) => {
+    if (id >= 0) return
+    const total = stat.numPicks + (stat.ignored ?? 0)
+    if (total >= AVAILABILITY_THRESHOLD) {
+      heroPools.set(Math.abs(id), { heroId: Math.abs(id), spells: [], ultimates: [] })
+    }
+  })
+
+  // Assign each eligible ability to its owner hero
+  abilityStatsMap.forEach((stat, id) => {
+    if (id <= 0) return
+    const total = stat.numPicks + (stat.ignored ?? 0)
+    if (total < AVAILABILITY_THRESHOLD) return
+    const ability = getAbilityById(id)
+    if (!ability?.ownerHeroId) return
+    const pool = heroPools.get(ability.ownerHeroId)
+    if (!pool) return
+    if (ability.isUltimate) pool.ultimates.push(id)
+    else pool.spells.push(id)
+  })
+
+  const N = heroPools.size
+  if (N < 12) return null
+
+  // ─── Step 2: Compute filler statistics ────────────────────────────────────
+  // These tell us how many filler slots we expect per game, used to estimate
+  // the probability of a specific ability appearing as a filler.
+  let totalEligibleUlts = 0
+  let totalEligibleSpells = 0
+  let heroesWithZeroUlts = 0
+  let totalSpellDeficit = 0 // sum of max(0, 3 - numSpells) across all heroes
+
+  heroPools.forEach(pool => {
+    totalEligibleUlts += pool.ultimates.length
+    totalEligibleSpells += pool.spells.length
+    if (pool.ultimates.length === 0) heroesWithZeroUlts++
+    if (pool.spells.length < 3) totalSpellDeficit += (3 - pool.spells.length)
+  })
+
+  // Expected filler slots per game:
+  //   Each drafted hero with 0 ults → 1 filler ult slot
+  //   Each drafted hero with K<3 spells → (3-K) filler spell slots
+  const expectedFillerUltSlots = 12 * heroesWithZeroUlts / N
+  const expectedFillerSpellSlots = 12 * totalSpellDeficit / N
+
+  steps.push({
+    label: 'Draft pool',
+    detail: `${N} heroes available, 12 drafted per game`,
+  })
+
+  // ─── Step 3: Identify body hero and group abilities by owner ──────────────
+  const bodySlot = filledSlots.find(s => s.type === 'hero')
+  const bodyHeroId = bodySlot ? Math.abs(bodySlot.abilityId!) : null
+
+  // Each non-body ability grouped by its owner hero
+  interface AbilityGroup {
+    heroId: number
+    heroName: string
+    neededSpells: number[]
+    neededUlts: number[]
+    pool: HeroAbilityPool | undefined
+    // Precomputed probabilities:
+    pSelectionGivenDrafted: number // P(all needed abilities selected | owner hero is drafted)
+    pFillerGivenNotDrafted: number // P(all needed abilities appear as fillers | owner NOT drafted)
+  }
+
+  const groupMap = new Map<number, AbilityGroup>()
+
+  for (const slot of filledSlots) {
+    if (slot.type === 'hero') continue
+    const ability = getAbilityById(slot.abilityId!)
+    if (!ability?.ownerHeroId) continue
+
+    const heroId = ability.ownerHeroId
+    if (!groupMap.has(heroId)) {
+      groupMap.set(heroId, {
+        heroId,
+        heroName: getHeroById(heroId)?.englishName ?? `Hero #${heroId}`,
+        neededSpells: [],
+        neededUlts: [],
+        pool: heroPools.get(heroId),
+        pSelectionGivenDrafted: 1,
+        pFillerGivenNotDrafted: 1,
+      })
+    }
+    const group = groupMap.get(heroId)!
+    if (slot.type === 'ultimate') group.neededUlts.push(slot.abilityId!)
+    else group.neededSpells.push(slot.abilityId!)
+  }
+
+  // ─── Step 4: Compute per-group probabilities ──────────────────────────────
+
+  // Separate groups: those whose owner IS the body hero vs others
+  const bodyGroups: AbilityGroup[] = []     // abilities from the body hero (always primary)
+  const otherGroups: AbilityGroup[] = []    // abilities from other heroes (primary or filler)
+
+  for (const group of groupMap.values()) {
+    if (group.heroId === bodyHeroId) bodyGroups.push(group)
+    else otherGroups.push(group)
+  }
+
+  // Helper: compute P(abilities selected from hero | hero drafted)
+  function computeSelectionProb(group: AbilityGroup): number {
+    const pool = group.pool
+    if (!pool) return 0
+
+    // Ultimates: auto-added. Verify they exist in the hero's eligible list.
+    for (const ultId of group.neededUlts) {
+      if (!pool.ultimates.includes(ultId)) return 0
+    }
+
+    // Spells: depends on how many eligible spells the hero has
+    const M = pool.spells.length
+    const J = group.neededSpells.length
+    if (J === 0) return 1
+    for (const spellId of group.neededSpells) {
+      if (!pool.spells.includes(spellId)) return 0
+    }
+    if (M <= 3) return 1
+    // C(M-J, 3-J) / C(M, 3): probability that all J specific spells are among the 3 chosen
+    return comb(M - J, 3 - J) / comb(M, 3)
+  }
+
+  // Helper: compute P(all abilities appear as fillers | owner hero NOT drafted)
+  function computeFillerProb(group: AbilityGroup): number {
+    let p = 1
+
+    // Each needed ultimate: approximate P(drawn as a filler ult)
+    // Filler ult slots arise from heroes with 0 eligible ultimates being drafted.
+    // P(specific ult drawn) ≈ expectedFillerUltSlots / totalEligibleUlts
+    for (let i = 0; i < group.neededUlts.length; i++) {
+      if (totalEligibleUlts === 0) return 0
+      p *= expectedFillerUltSlots / totalEligibleUlts
+    }
+
+    // Each needed spell: approximate P(drawn as a filler spell)
+    // Filler spell slots arise from heroes with <3 eligible spells being drafted.
+    // P(specific spell drawn) ≈ expectedFillerSpellSlots / totalEligibleSpells
+    for (let i = 0; i < group.neededSpells.length; i++) {
+      if (totalEligibleSpells === 0) return 0
+      p *= expectedFillerSpellSlots / totalEligibleSpells
+    }
+
+    return p
+  }
+
+  // Compute probabilities for each group
+  for (const group of [...bodyGroups, ...otherGroups]) {
+    group.pSelectionGivenDrafted = computeSelectionProb(group)
+    group.pFillerGivenNotDrafted = computeFillerProb(group)
+  }
+
+  // ─── Step 5: Body hero probability ────────────────────────────────────────
+  // The body hero must always be drafted. No filler path for hero bodies.
+  let pBody = 1
+  let bodySelectionP = 1
+
+  if (bodyHeroId !== null) {
+    pBody = 12 / N
+    const bodyHeroName = getHeroById(bodyHeroId)?.englishName ?? `Hero #${bodyHeroId}`
+    steps.push({
+      label: `${bodyHeroName} (body)`,
+      detail: `must be drafted: 12 / ${N} = ${(pBody * 100).toFixed(2)}%`,
+    })
+
+    // If any abilities also come from the body hero, they're always primary
+    for (const group of bodyGroups) {
+      bodySelectionP *= group.pSelectionGivenDrafted
+      if (bodySelectionP === 0) {
+        steps.push({
+          label: abilityNamesForGroup(group),
+          detail: 'not eligible for this hero',
+        })
+        return { probability: 0, heroesAvailable: N, steps }
+      }
+
+      const pool = group.pool!
+      const M = pool.spells.length
+      const J = group.neededSpells.length
+      const names = abilityNamesForGroup(group)
+
+      if (group.neededUlts.length > 0 && J === 0) {
+        steps.push({ label: names, detail: `same hero as body, ult auto-added` })
+      } else if (M <= 3 || J === 0) {
+        steps.push({ label: names, detail: `same hero as body, all ${M} spells included` })
+      } else {
+        steps.push({
+          label: names,
+          detail: `same hero, ${J} of ${M} spells (3 chosen) = ${(bodySelectionP * 100).toFixed(2)}%`,
+        })
+      }
+    }
+  }
+
+  // ─── Step 6: Enumerate primary/filler combinations for other groups ───────
+  // For each non-body group, the abilities can arrive via:
+  //   - Primary: owner hero is drafted AND abilities are selected from their pool.
+  //   - Filler: owner hero is NOT drafted AND abilities appear as random fillers.
+  //
+  // We enumerate all 2^G combinations and sum the exact probability for each.
+  // G is at most 4 (for a 5-slot build where every ability is from a different hero).
+  const G = otherGroups.length
+  const numCombos = 1 << G  // 2^G
+  let totalP = 0
+
+  for (let combo = 0; combo < numCombos; combo++) {
+    // Determine which groups use primary (bit=1) vs filler (bit=0)
+    const primaryIdxs: number[] = []
+    const fillerIdxs: number[] = []
+    for (let g = 0; g < G; g++) {
+      if (combo & (1 << g)) primaryIdxs.push(g)
+      else fillerIdxs.push(g)
+    }
+
+    const numPrimaryHeroes = primaryIdxs.length
+    // k = total heroes that must be drafted: body (if set) + primary groups
+    const k = (bodyHeroId !== null ? 1 : 0) + numPrimaryHeroes
+    // m = filler groups whose heroes must NOT be drafted
+    const m = fillerIdxs.length
+
+    // P(all k required heroes are among the 12 drafted):
+    //   = (12/N) × (11/(N-1)) × ... × ((12-k+1)/(N-k+1))
+    let pHeroesDrafted = pBody
+    for (let i = 0; i < numPrimaryHeroes; i++) {
+      const slotsLeft = 12 - (bodyHeroId !== null ? 1 : 0) - i
+      const heroesLeft = N - (bodyHeroId !== null ? 1 : 0) - i
+      pHeroesDrafted *= slotsLeft / heroesLeft
+    }
+
+    // P(filler groups' heroes are NOT among the 12 | required heroes are drafted):
+    //   The remaining 12-k slots are filled from N-k heroes (excluding required ones).
+    //   P(specific hero NOT in remaining) uses sequential exclusion:
+    //   = (N-12)/(N-k) × (N-12-1)/(N-k-1) × ...
+    let pHeroesExcluded = 1
+    for (let j = 0; j < m; j++) {
+      pHeroesExcluded *= (N - 12 - j) / (N - k - j)
+    }
+
+    // P(ability selection for primary groups):
+    let pSelection = bodySelectionP
+    for (const gi of primaryIdxs) {
+      pSelection *= otherGroups[gi].pSelectionGivenDrafted
+    }
+
+    // P(filler draws for filler groups):
+    let pFiller = 1
+    for (const gi of fillerIdxs) {
+      pFiller *= otherGroups[gi].pFillerGivenNotDrafted
+    }
+
+    totalP += pHeroesDrafted * pHeroesExcluded * pSelection * pFiller
+  }
+
+  // ─── Step 7: Build per-group breakdown for display ────────────────────────
+  for (const group of otherGroups) {
+    const names = abilityNamesForGroup(group)
+
+    // Per-group marginal: P(primary path) + P(filler path)
+    const slotsForHero = 12 - (bodyHeroId !== null ? 1 : 0)
+    const heroesForHero = N - (bodyHeroId !== null ? 1 : 0)
+    const pHeroDrafted = slotsForHero / heroesForHero
+    const pPrimary = pHeroDrafted * group.pSelectionGivenDrafted
+    const pFillerPath = (1 - pHeroDrafted) * group.pFillerGivenNotDrafted
+
+    const pool = group.pool
+    const M = pool?.spells.length ?? 0
+    const J = group.neededSpells.length
+
+    let detail = `via ${group.heroName}: ${slotsForHero}/${heroesForHero}`
+    if (M > 3 && J > 0) {
+      detail += ` × ${J}/${M} spell selection`
+    }
+    detail += ` = ${(pPrimary * 100).toFixed(2)}%`
+
+    const step: AvailabilityStep = { label: names, detail }
+
+    if (pFillerPath > 0.00001) {
+      step.subDetail = `+ filler path: ~${(pFillerPath * 100).toFixed(4)}%`
+    }
+
+    steps.push(step)
+  }
+
+  // Show filler context if any filler paths exist
+  if (expectedFillerUltSlots > 0 || expectedFillerSpellSlots > 0) {
+    const parts: string[] = []
+    if (expectedFillerUltSlots > 0) {
+      parts.push(`~${expectedFillerUltSlots.toFixed(1)} filler ult slots/game (${heroesWithZeroUlts} heroes with no ult)`)
+    }
+    if (expectedFillerSpellSlots > 0) {
+      parts.push(`~${expectedFillerSpellSlots.toFixed(1)} filler spell slots/game`)
+    }
+    steps.push({ label: 'Filler context', detail: parts.join('; ') })
+  }
+
+  return { probability: totalP, heroesAvailable: N, steps }
+}
+
+/** Format ability names for a hero group */
+function abilityNamesForGroup(group: { neededUlts: number[]; neededSpells: number[] }): string {
+  const names = [
+    ...group.neededUlts.map(id => getAbilityById(id)?.englishName ?? `#${id}`),
+    ...group.neededSpells.map(id => getAbilityById(id)?.englishName ?? `#${id}`),
+  ]
+  return names.join(' + ')
+}
+
 // --- Main page ---
 
 export function HeroBuilderPage() {
@@ -615,6 +993,11 @@ export function HeroBuilderPage() {
 
   const filledCount = build.filter(s => s.abilityId !== null).length
 
+  // Build availability: probability this exact build could appear in a random draft
+  const availability = useMemo(() => {
+    return computeBuildAvailability(build, abilityStatsMap)
+  }, [build, abilityStatsMap])
+
   // Render icon for an ability/hero ID (used in synergy pairs)
   const renderPairIcon = (id: number) => {
     if (id < 0) {
@@ -804,6 +1187,36 @@ export function HeroBuilderPage() {
                     </div>
                   )
                 })}
+              </div>
+            </div>
+          )}
+
+          {/* Build Availability */}
+          {availability && (
+            <div className={styles.statsSection}>
+              <h3 className={styles.statsSectionTitle}>Build Availability</h3>
+              <div className={styles.availabilityHeader}>
+                <span className={styles.availabilityValue}>
+                  {availability.probability < 0.00005
+                    ? '< 0.01%'
+                    : (availability.probability * 100).toFixed(4) + '%'}
+                </span>
+                <span className={styles.availabilityApprox}>
+                  ~1 / {availability.probability > 0
+                    ? Math.round(1 / availability.probability).toLocaleString()
+                    : '∞'} games
+                </span>
+              </div>
+              <div className={styles.availabilityBreakdown}>
+                {availability.steps.map((step, i) => (
+                  <div key={i} className={styles.availabilityStep}>
+                    <span className={styles.availabilityStepLabel}>{step.label}</span>
+                    <span className={styles.availabilityStepDetail}>{step.detail}</span>
+                    {step.subDetail && (
+                      <span className={styles.availabilityStepSub}>{step.subDetail}</span>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
           )}
