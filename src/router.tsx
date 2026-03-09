@@ -38,6 +38,7 @@ import { LeaderboardPage } from './pages/Leaderboard'
 import { DistributionPage } from './pages/Distribution'
 import { PlayerPage } from './pages/Player'
 import { MatchPage } from './pages/Match'
+import { HeroBuilderPage } from './pages/HeroBuilder'
 import { PredictionGamePage } from './pages/PredictionGame'
 import { ErrorPage } from './pages/Error'
 import { NotFoundPage } from './pages/NotFound'
@@ -68,6 +69,7 @@ export const router = createBrowserRouter([
       { path: '/player-distribution', element: <DistributionPage /> },
       { path: '/players/:playerId', element: <PlayerPage /> },
       { path: '/matches/:matchId', element: <MatchPage /> },
+      { path: '/hero-builder', element: <HeroBuilderPage /> },
       { path: '/game', element: <PredictionGamePage /> },
       { path: '/error', element: <ErrorPage /> },
       { path: '*', element: <NotFoundPage /> },

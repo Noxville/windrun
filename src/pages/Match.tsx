@@ -252,6 +252,30 @@ function getStatGlowStyle(advantage: number, scale: number): React.CSSProperties
   }
 }
 
+function buildHeroBuilderUrl(abilities: number[], patch: string | undefined): string {
+  const params = new URLSearchParams()
+  if (patch) params.set('patch', patch)
+
+  const spells: number[] = []
+  for (const id of abilities) {
+    if (id < 0) {
+      params.set('hero', String(id))
+    } else {
+      const ability = getAbilityById(id)
+      if (ability?.isUltimate) {
+        params.set('ult', String(id))
+      } else if (ability) {
+        spells.push(id)
+      }
+    }
+  }
+  spells.forEach((id, i) => {
+    if (i < 3) params.set(`a${i + 1}`, String(id))
+  })
+
+  return `/hero-builder?${params.toString()}`
+}
+
 interface PlayerCardProps {
   player: PlayerData
   isWinner: boolean
@@ -259,10 +283,11 @@ interface PlayerCardProps {
   pickOrderMap: Map<number, number>
   abilityWinrates: Map<number, number>
   abilityPairs: Map<string, { winrate: number; numPicks: number }>
+  patch?: string
   simple?: boolean
 }
 
-function PlayerCard({ player, isWinner, side, pickOrderMap, abilityWinrates, abilityPairs, simple = false }: PlayerCardProps) {
+function PlayerCard({ player, isWinner, side, pickOrderMap, abilityWinrates, abilityPairs, patch, simple = false }: PlayerCardProps) {
   const hero = getHeroById(player.hero)
 
   const resolvedAbilities = player.abilities.map(abilityId => {
@@ -291,6 +316,22 @@ function PlayerCard({ player, isWinner, side, pickOrderMap, abilityWinrates, abi
       winrate: winrate ?? null,
     }
   })
+
+  const builderUrl = buildHeroBuilderUrl(player.abilities, patch)
+
+  const builderLink = (
+    <a
+      href={builderUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={styles.builderLink}
+      title="Open in Hero Builder"
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={styles.builderIcon}>
+        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+      </svg>
+    </a>
+  )
 
   // Calculate average pick position for simple view
   const avgPickPos = useMemo(() => {
@@ -573,6 +614,7 @@ function PlayerCard({ player, isWinner, side, pickOrderMap, abilityWinrates, abi
           {heroBlock}
           {simpleStatsContent}
           {abilitiesBlock}
+          {builderLink}
         </div>
       </div>
     )
@@ -587,6 +629,7 @@ function PlayerCard({ player, isWinner, side, pickOrderMap, abilityWinrates, abi
         {itemsContent}
         {abilitiesBlock}
         {pairsContent}
+        {builderLink}
       </div>
     </div>
   )
@@ -975,6 +1018,7 @@ export function MatchPage() {
                   pickOrderMap={pickOrderMap}
                   abilityWinrates={abilityWinrates}
                   abilityPairs={abilityPairs}
+                  patch={patch}
                 />
               ))}
             </div>
@@ -988,6 +1032,7 @@ export function MatchPage() {
                   pickOrderMap={pickOrderMap}
                   abilityWinrates={abilityWinrates}
                   abilityPairs={abilityPairs}
+                  patch={patch}
                 />
               ))}
             </div>
@@ -1019,6 +1064,7 @@ export function MatchPage() {
                   pickOrderMap={pickOrderMap}
                   abilityWinrates={abilityWinrates}
                   abilityPairs={abilityPairs}
+                  patch={patch}
                   simple
                 />
               ))}
@@ -1033,6 +1079,7 @@ export function MatchPage() {
                   pickOrderMap={pickOrderMap}
                   abilityWinrates={abilityWinrates}
                   abilityPairs={abilityPairs}
+                  patch={patch}
                   simple
                 />
               ))}

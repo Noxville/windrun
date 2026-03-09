@@ -41,6 +41,10 @@ const NAV_ITEMS: NavItem[] = [
       { label: 'Distribution', href: '/player-distribution', description: 'Rating distribution' },
     ],
   },
+  {
+    label: 'Hero Builder',
+    href: '/hero-builder',
+  },
   // Game link hidden for now
   // {
   //   label: 'Game',
