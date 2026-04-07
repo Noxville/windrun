@@ -289,7 +289,7 @@ export function AbilityHeroAttributesPage() {
       return sortDir === 'desc' ? -result : result
     })
     return data
-  }, [attributeData, sortField, sortDir])
+  }, [filteredAttributeData, sortField, sortDir])
 
   const sortedAttackTypeData = useMemo(() => {
     const data = [...filteredAttackTypeData]

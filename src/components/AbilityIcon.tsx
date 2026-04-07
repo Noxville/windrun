@@ -38,7 +38,10 @@ export function AbilityIcon({
           alt={name}
           className={styles.image}
           loading="lazy"
-          onError={() => setImgError(true)}
+          onError={() => {
+            console.warn(`Missing ability icon: "${name}" (${shortName})`, abilityIconUrl(shortName))
+            setImgError(true)
+          }}
         />
       ) : (
         <div className={styles.fallback}>
