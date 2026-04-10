@@ -2,11 +2,12 @@ import { useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import styles from './Abilities.module.css'
 import type { ColumnDef, SortingState } from '@tanstack/react-table'
+import { createColumnHelper } from '@tanstack/react-table'
 import { PageShell } from '../components/PageShell'
 import {
   DataTable,
   GradientCell,
-  NumericCell,
+  DeltaCell,
   AbilityInline,
   HeroInline,
   PatchSelector,
@@ -52,6 +53,10 @@ interface AbilityStatsRow {
   winRate: number
   pickRate: number
   avgPickPos: number
+  prevAvgPickPos: number | null
+  prevWinRate: number | null
+  avgPickPosDelta: number | null
+  winRateDelta: number | null
   value: number | null    // ability valuation (picked early/late relative to expected)
 }
 
@@ -87,11 +92,29 @@ export function AbilitiesPage() {
     }
     setSearchParams(newParams)
   }
-  const { data: apiResponse, isLoading, error } = usePersistedQuery<AbilitiesApiResponse>(
+  const { data: apiResponse, isLoading: currentLoading, error } = usePersistedQuery<AbilitiesApiResponse>(
     '/abilities',
     currentPatch ? { patch: currentPatch } : undefined,
     { enabled: !!currentPatch }
   )
+
+  const { data: prevApiResponse, isLoading: prevLoading } = usePersistedQuery<AbilitiesApiResponse>(
+    '/abilities',
+    prevPatch ? { patch: prevPatch } : undefined,
+    { enabled: !!prevPatch }
+  )
+
+  const isLoading = currentLoading || (prevPatch && prevLoading)
+
+  // Build lookup for previous patch stats by abilityId
+  const prevStatsMap = useMemo(() => {
+    if (!prevApiResponse?.data?.abilityStats) return null
+    const map = new Map<number, { winrate: number; avgPickPosition: number }>()
+    for (const stat of prevApiResponse.data.abilityStats) {
+      map.set(stat.abilityId, { winrate: stat.winrate, avgPickPosition: stat.avgPickPosition })
+    }
+    return map
+  }, [prevApiResponse])
 
   // Transform API response into array format
   const statsData = useMemo<AbilityStatsRow[]>(() => {
@@ -113,6 +136,13 @@ export function AbilitiesPage() {
         // Get valuation from the map (key is string)
         const valuation = valuations[String(stat.abilityId)] ?? null
 
+        // Previous patch stats
+        const prev = prevStatsMap?.get(stat.abilityId)
+        const winRate = stat.winrate * 100
+        const avgPickPos = stat.avgPickPosition
+        const prevWinRate = prev ? prev.winrate * 100 : null
+        const prevAvgPickPos = prev ? prev.avgPickPosition : null
+
         return {
           abilityId: stat.abilityId,
           abilityName: isHeroAbility
@@ -127,14 +157,18 @@ export function AbilitiesPage() {
           ownerHeroName: ownerHeroData?.englishName ?? '',
           picks: stat.numPicks,
           wins: stat.wins,
-          winRate: stat.winrate * 100,
+          winRate,
           pickRate: stat.pickRate * 100,
-          avgPickPos: stat.avgPickPosition,
+          avgPickPos,
+          prevAvgPickPos,
+          prevWinRate,
+          avgPickPosDelta: prevAvgPickPos !== null ? avgPickPos - prevAvgPickPos : null,
+          winRateDelta: prevWinRate !== null ? winRate - prevWinRate : null,
           value: valuation,
         }
       })
       .filter(row => row.picks > 0 && row.abilityName && !row.abilityName.startsWith('special_bonus'))
-  }, [apiResponse])
+  }, [apiResponse, prevStatsMap])
 
   // Calculate total games (sum of picks for non-hero abilities divided by 40)
   const totalGames = useMemo(() => {
@@ -163,12 +197,15 @@ export function AbilitiesPage() {
     }
   }, [statsData])
 
-  const columns = useMemo<ColumnDef<AbilityStatsRow>[]>(
+  const columnHelper = createColumnHelper<AbilityStatsRow>()
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const columns = useMemo<ColumnDef<AbilityStatsRow, any>[]>(
     () => [
       {
         id: 'rank',
         header: '#',
-        size: 44,
+        size: 54,
         enableSorting: false,
         cell: () => <RankCell />,
       },
@@ -178,7 +215,6 @@ export function AbilitiesPage() {
         size: 240,
         cell: info => {
           const row = info.row.original
-          // For hero abilities, render HeroInline instead
           if (row.isHeroAbility && row.heroId && row.heroPicture) {
             return (
               <HeroInline
@@ -224,99 +260,151 @@ export function AbilitiesPage() {
           )
         },
       },
-      {
-        accessorKey: 'winRate',
-        header: 'Win Rate',
-        size: 100,
-        cell: info => (
-          <GradientCell
-            value={info.getValue() as number}
-            min={minWinRate}
-            max={maxWinRate}
-            decimals={1}
-            suffix="%"
-          />
-        ),
-      },
-      {
-        accessorKey: 'pickRate',
-        header: 'Pick Rate',
-        size: 100,
-        cell: info => (
-          <GradientCell
-            value={info.getValue() as number}
-            min={minPickRate}
-            max={maxPickRate}
-            decimals={1}
-            suffix="%"
-          />
-        ),
-      },
-      {
-        accessorKey: 'avgPickPos',
-        header: 'Avg Pick',
-        size: 100,
-        cell: info => (
-          <GradientCell
-            value={info.getValue() as number}
-            min={minPickPos}
-            max={maxPickPos}
-            decimals={1}
-            suffix=""
-            invert={true}
-          />
-        ),
-      },
-      {
-        accessorKey: 'value',
-        header: () => (
-          <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            Value
-            <span
-              title="How early/late this ability is picked relative to its win rate. Positive = picked later than expected (undervalued). Negative = picked earlier than expected (overvalued). See About page for details."
-              style={{
-                cursor: 'help',
-                fontSize: '12px',
-                color: 'var(--color-text-muted)',
-                border: '1px solid var(--color-border)',
-                borderRadius: '50%',
-                width: '14px',
-                height: '14px',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              ?
-            </span>
-          </span>
-        ),
-        size: 90,
-        cell: info => {
-          const value = info.getValue() as number | null
-          if (value === null) return <span style={{ color: 'var(--color-text-muted)' }}>—</span>
-          const color = value > 0.02 ? 'var(--color-positive)' : value < -0.02 ? 'var(--color-negative)' : 'var(--color-text)'
-          return (
-            <span style={{ color, fontVariantNumeric: 'tabular-nums' }}>
-              {value > 0 ? '+' : ''}{(value * 100).toFixed(1)}%
-            </span>
-          )
-        },
-      },
-      {
-        accessorKey: 'picks',
-        header: 'Picks',
-        size: 80,
-        cell: info => <NumericCell value={info.getValue() as number} decimals={0} />,
-      },
-      {
-        accessorKey: 'wins',
-        header: 'Wins',
-        size: 80,
-        cell: info => <NumericCell value={info.getValue() as number} decimals={0} />,
-      },
+      // Previous patch group
+      columnHelper.group({
+        id: 'prevPatch',
+        header: () => <span style={{ color: 'var(--color-text-muted)' }}>{prevPatch ?? 'Previous'}</span>,
+        columns: [
+          columnHelper.accessor('prevWinRate', {
+            header: 'Win Rate',
+            size: 90,
+            cell: info => {
+              const value = info.getValue()
+              if (value === null) return <span style={{ color: 'var(--color-text-muted)' }}>—</span>
+              return (
+                <GradientCell
+                  value={value}
+                  min={minWinRate}
+                  max={maxWinRate}
+                  decimals={1}
+                  suffix="%"
+                />
+              )
+            },
+          }),
+          columnHelper.accessor('prevAvgPickPos', {
+            header: 'Avg Pick',
+            size: 90,
+            cell: info => {
+              const value = info.getValue()
+              if (value === null) return <span style={{ color: 'var(--color-text-muted)' }}>—</span>
+              return (
+                <GradientCell
+                  value={value}
+                  min={minPickPos}
+                  max={maxPickPos}
+                  decimals={1}
+                  suffix=""
+                  invert={true}
+                />
+              )
+            },
+          }),
+        ],
+      }),
+      // Current patch group
+      columnHelper.group({
+        id: 'currentPatch',
+        header: () => <span style={{ color: 'var(--color-accent)' }}>{currentPatch ?? 'Current'}</span>,
+        columns: [
+          columnHelper.accessor('winRate', {
+            header: 'Win Rate',
+            size: 90,
+            meta: { hasBorderLeft: true },
+            cell: info => (
+              <GradientCell
+                value={info.getValue()}
+                min={minWinRate}
+                max={maxWinRate}
+                decimals={1}
+                suffix="%"
+              />
+            ),
+          }),
+          columnHelper.accessor('winRateDelta', {
+            header: 'ΔWR',
+            size: 55,
+            cell: info => {
+              const delta = info.getValue()
+              if (delta === null) return <span style={{ color: 'var(--color-text-muted)' }}>—</span>
+              return <DeltaCell value={delta} decimals={1} suffix="%" />
+            },
+          }),
+          columnHelper.accessor('avgPickPos', {
+            header: 'Avg Pick',
+            size: 90,
+            cell: info => (
+              <GradientCell
+                value={info.getValue()}
+                min={minPickPos}
+                max={maxPickPos}
+                decimals={1}
+                suffix=""
+                invert={true}
+              />
+            ),
+          }),
+          columnHelper.accessor('avgPickPosDelta', {
+            header: 'ΔPick',
+            size: 65,
+            cell: info => {
+              const delta = info.getValue()
+              if (delta === null) return <span style={{ color: 'var(--color-text-muted)' }}>—</span>
+              return <DeltaCell value={delta} decimals={1} invertColors={true} />
+            },
+          }),
+          columnHelper.accessor('pickRate', {
+            header: 'Pick Rate',
+            size: 90,
+            cell: info => (
+              <GradientCell
+                value={info.getValue()}
+                min={minPickRate}
+                max={maxPickRate}
+                decimals={1}
+                suffix="%"
+              />
+            ),
+          }),
+          columnHelper.accessor('value', {
+            header: () => (
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                Value
+                <span
+                  title="How early/late this ability is picked relative to its win rate. Positive = picked later than expected (undervalued). Negative = picked earlier than expected (overvalued). See About page for details."
+                  style={{
+                    cursor: 'help',
+                    fontSize: '12px',
+                    color: 'var(--color-text-muted)',
+                    border: '1px solid var(--color-border)',
+                    borderRadius: '50%',
+                    width: '14px',
+                    height: '14px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  ?
+                </span>
+              </span>
+            ),
+            size: 90,
+            cell: info => {
+              const value = info.getValue()
+              if (value === null) return <span style={{ color: 'var(--color-text-muted)' }}>—</span>
+              const color = value > 0.02 ? 'var(--color-positive)' : value < -0.02 ? 'var(--color-negative)' : 'var(--color-text)'
+              return (
+                <span style={{ color, fontVariantNumeric: 'tabular-nums' }}>
+                  {value > 0 ? '+' : ''}{(value * 100).toFixed(1)}%
+                </span>
+              )
+            },
+          }),
+        ],
+      }),
     ],
-    [minWinRate, maxWinRate, minPickRate, maxPickRate, minPickPos, maxPickPos]
+    [columnHelper, minWinRate, maxWinRate, minPickRate, maxPickRate, minPickPos, maxPickPos, prevPatch, currentPatch]
   )
 
   const tableData = useMemo(
@@ -389,7 +477,7 @@ export function AbilitiesPage() {
         onSortingChange={setSorting}
         onRowClick={handleRowClick}
         emptyMessage="No abilities found"
-        loading={isLoading}
+        loading={!!isLoading}
         extraStats={{ value: totalGames, label: 'games' }}
       />
     </PageShell>
