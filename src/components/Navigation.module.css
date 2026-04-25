@@ -366,9 +366,9 @@
    ============================================ */
 .mobileToggle {
   display: none;
-  width: 32px;
-  height: 32px;
-  padding: 6px;
+  width: 44px;
+  height: 44px;
+  padding: 12px;
   background: none;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
@@ -420,6 +420,10 @@
    RESPONSIVE
    ============================================ */
 @media (max-width: 900px) {
+  .nav {
+    position: relative;
+  }
+
   .mobileToggle {
     display: flex;
     align-items: center;
@@ -483,35 +487,15 @@
   }
 
   .auth {
-    position: absolute;
-    top: 100%;
-    right: var(--space-md);
-    margin-top: var(--space-md);
-  }
-
-  .linksOpen + .auth {
-    position: static;
-    margin-top: var(--space-md);
-    padding-top: var(--space-md);
-    border-top: 1px solid var(--color-border);
-    width: 100%;
-    justify-content: center;
-  }
-}
-
-@media (max-width: 900px) {
-  .nav {
-    position: relative;
-  }
-
-  .auth {
-    order: 3;
+    display: none;
   }
 
   .linksOpen ~ .auth {
-    position: static;
+    display: flex;
+    width: 100%;
     margin: 0;
     padding-top: var(--space-md);
     border-top: 1px solid var(--color-border);
+    justify-content: center;
   }
 }
