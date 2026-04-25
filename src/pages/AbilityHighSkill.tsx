@@ -217,6 +217,7 @@ export function AbilityHighSkillPage() {
             max={40}
             decimals={1}
             invert={true}
+            suffix=""
           />
         ),
       },
@@ -243,6 +244,7 @@ export function AbilityHighSkillPage() {
             max={40}
             decimals={1}
             invert={true}
+            suffix=""
           />
         ),
       },
