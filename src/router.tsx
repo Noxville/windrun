@@ -38,6 +38,8 @@ import { LeaderboardPage } from './pages/Leaderboard'
 import { DistributionPage } from './pages/Distribution'
 import { PlayerPage } from './pages/Player'
 import { MatchPage } from './pages/Match'
+import { LeagueGamesPage } from './pages/LeagueGames'
+import { LeagueDetailPage } from './pages/LeagueDetail'
 import { HeroBuilderPage } from './pages/HeroBuilder'
 import { PredictionGamePage } from './pages/PredictionGame'
 import { ErrorPage } from './pages/Error'
@@ -69,6 +71,8 @@ export const router = createBrowserRouter([
       { path: '/player-distribution', element: <DistributionPage /> },
       { path: '/players/:playerId', element: <PlayerPage /> },
       { path: '/matches/:matchId', element: <MatchPage /> },
+      { path: '/league-games', element: <LeagueGamesPage /> },
+      { path: '/leagues/:leagueId', element: <LeagueDetailPage /> },
       { path: '/hero-builder', element: <HeroBuilderPage /> },
       { path: '/game', element: <PredictionGamePage /> },
       { path: '/error', element: <ErrorPage /> },

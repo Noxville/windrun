@@ -7,6 +7,7 @@ interface NavItem {
   label: string
   href?: string
   onClick?: () => void
+  isNew?: boolean
   children?: { label: string; href: string; description?: string; isNew?: boolean }[]
 }
 
@@ -44,6 +45,11 @@ const NAV_ITEMS: NavItem[] = [
   {
     label: 'Hero Builder',
     href: '/hero-builder',
+  },
+  {
+    label: 'Leagues Games',
+    href: '/league-games',
+    isNew: true,
   },
   // Game link hidden for now
   // {
@@ -175,6 +181,7 @@ export function Navigation() {
                 className={`${styles.navLink} ${isActive(item.href!) ? styles.navLinkActive : ''}`}
               >
                 {item.label}
+                {item.isNew && <span className={styles.newBadge}>new</span>}
               </Link>
             )}
           </div>
