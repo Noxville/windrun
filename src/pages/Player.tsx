@@ -542,16 +542,20 @@ export function PlayerPage() {
             </div>
             {stats.factionStats && (
               <div className={styles.factionTotals}>
-                <div className={`${styles.factionTotal} ${styles.radiantFaction}`}>
-                  <span>Radiant</span>
-                  <span>{stats.factionStats.RADIANT.wins}-{stats.factionStats.RADIANT.losses}</span>
-                  <span>{(stats.factionStats.RADIANT.winrate * 100).toFixed(1)}%</span>
-                </div>
-                <div className={`${styles.factionTotal} ${styles.direFaction}`}>
-                  <span>Dire</span>
-                  <span>{stats.factionStats.DIRE.wins}-{stats.factionStats.DIRE.losses}</span>
-                  <span>{(stats.factionStats.DIRE.winrate * 100).toFixed(1)}%</span>
-                </div>
+                {stats.factionStats.RADIANT && (
+                  <div className={`${styles.factionTotal} ${styles.radiantFaction}`}>
+                    <span>Radiant</span>
+                    <span>{stats.factionStats.RADIANT.wins}-{stats.factionStats.RADIANT.losses}</span>
+                    <span>{(stats.factionStats.RADIANT.winrate * 100).toFixed(1)}%</span>
+                  </div>
+                )}
+                {stats.factionStats.DIRE && (
+                  <div className={`${styles.factionTotal} ${styles.direFaction}`}>
+                    <span>Dire</span>
+                    <span>{stats.factionStats.DIRE.wins}-{stats.factionStats.DIRE.losses}</span>
+                    <span>{(stats.factionStats.DIRE.winrate * 100).toFixed(1)}%</span>
+                  </div>
+                )}
               </div>
             )}
           </div>}

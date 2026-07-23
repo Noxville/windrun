@@ -29,3 +29,30 @@
   margin: 0;
   max-width: 400px;
 }
+
+.details {
+  margin: var(--space-lg) 0 0 0;
+  padding: var(--space-md);
+  max-width: 100%;
+  max-height: 300px;
+  overflow: auto;
+  text-align: left;
+  font-size: var(--text-caption);
+  color: var(--color-text-muted);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.homeLink {
+  margin-top: var(--space-xl);
+  color: var(--color-accent);
+  font-weight: var(--weight-bold);
+  text-decoration: none;
+}
+
+.homeLink:hover {
+  text-decoration: underline;
+}

@@ -42,12 +42,13 @@ import { LeagueGamesPage } from './pages/LeagueGames'
 import { LeagueDetailPage } from './pages/LeagueDetail'
 import { HeroBuilderPage } from './pages/HeroBuilder'
 import { PredictionGamePage } from './pages/PredictionGame'
-import { ErrorPage } from './pages/Error'
+import { ErrorPage, RouteErrorBoundary } from './pages/Error'
 import { NotFoundPage } from './pages/NotFound'
 
 export const router = createBrowserRouter([
   {
     element: <AppLayout />,
+    errorElement: <RouteErrorBoundary />,
     children: [
       { path: '/', element: <HomePage /> },
       { path: '/status', element: <StatusPage /> },

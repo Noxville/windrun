@@ -72,8 +72,8 @@ export interface PlayerStats {
   spellStats: Record<string, SpellStat>
   seatStats: Record<string, WinLossStats>
   factionStats: {
-    RADIANT: WinLossStats
-    DIRE: WinLossStats
+    RADIANT?: WinLossStats
+    DIRE?: WinLossStats
   }
   rangedMeleeStats?: Record<string, WinLossStats>
   endGameItemStats?: Record<string, unknown>
