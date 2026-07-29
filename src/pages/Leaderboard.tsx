@@ -4,6 +4,7 @@ import type { ColumnDef } from '@tanstack/react-table'
 import { PageShell } from '../components/PageShell'
 import { DataTable, NumericCell, GradientCell } from '../components'
 import { usePersistedQuery } from '../api'
+import { getRatingTag, EFFECT_LABEL } from '../utils/ratingTags'
 import styles from './Leaderboard.module.css'
 
 const REGIONS = [
@@ -18,6 +19,9 @@ interface LeaderboardApiResponse {
   data: Array<{
     steamId: number
     rating: number
+    rawRating?: number
+    penaltyPct?: number
+    tags?: string[]
     winLoss: {
       wins: number
       losses: number
@@ -44,6 +48,9 @@ interface LeaderboardRow {
   wins: number
   winRate: number
   rating?: number
+  rawRating?: number
+  penaltyPct: number
+  tags: string[]
 }
 
 // Map API region codes to display labels
@@ -82,6 +89,9 @@ export function LeaderboardPage() {
       wins: player.winLoss.wins,
       winRate: player.winLoss.winrate * 100,
       rating: player.rating,
+      rawRating: player.rawRating,
+      penaltyPct: player.penaltyPct ?? 0,
+      tags: player.tags ?? [],
     }))
   }, [apiResponse, isRegionalView])
 
@@ -177,13 +187,59 @@ export function LeaderboardPage() {
         cell: info => <NumericCell value={info.getValue() as number} decimals={0} />,
       },
       {
+        accessorKey: 'rawRating',
+        header: 'Raw',
+        size: 80,
+        cell: info => {
+          const raw = info.getValue() as number | undefined
+          if (raw === undefined) return <span className={styles.emptyCell}>—</span>
+          return <NumericCell value={raw} decimals={0} />
+        },
+      },
+      {
+        accessorKey: 'penaltyPct',
+        header: 'Penalty',
+        size: 85,
+        cell: info => {
+          const pct = info.getValue() as number
+          if (pct <= 0) return <span className={styles.emptyCell}>—</span>
+          return <span className={styles.penalty}>−{pct.toFixed(1)}%</span>
+        },
+      },
+      {
         accessorKey: 'rating',
         header: 'Rating',
         size: 90,
         cell: info => {
           const rating = info.getValue() as number | undefined
-          if (rating === undefined) return <span style={{ color: 'var(--color-text-muted)' }}>—</span>
+          if (rating === undefined) return <span className={styles.emptyCell}>—</span>
           return <NumericCell value={rating} decimals={0} />
+        },
+      },
+      {
+        id: 'tags',
+        header: 'Tags',
+        size: 96,
+        enableSorting: false,
+        cell: info => {
+          const { tags } = info.row.original
+          if (tags.length === 0) return <span className={styles.emptyCell}>—</span>
+          return (
+            <div className={styles.tagCell}>
+              {tags.map(tag => {
+                const tagInfo = getRatingTag(tag)
+                return (
+                  <span
+                    key={tag}
+                    className={`${styles.tagChip} ${tagInfo.effect === 'tag-only' ? styles.tagChipNeutral : styles.tagChipPenalised}`}
+                    title={`${tagInfo.label} (${EFFECT_LABEL[tagInfo.effect]}) — ${tagInfo.description}`}
+                  >
+                    {tagInfo.short}
+                  </span>
+                )
+              })}
+            </div>
+          )
         },
       },
       {

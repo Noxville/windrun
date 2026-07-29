@@ -44,6 +44,7 @@
 .header {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: var(--space-lg);
   padding: var(--space-lg);
   background: var(--color-bg-surface);
@@ -63,8 +64,8 @@
 }
 
 .headerInfo {
-  flex: 1;
-  min-width: 0;
+  flex: 1 1 220px;
+  min-width: 220px;
 }
 
 .nickname {
@@ -82,7 +83,8 @@
 .headerMeta {
   display: flex;
   align-items: center;
-  gap: var(--space-md);
+  flex-wrap: wrap;
+  gap: var(--space-sm) var(--space-md);
 }
 
 .regionBadge {
@@ -95,6 +97,50 @@
   font-weight: var(--weight-bold);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+}
+
+.tagList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.tag {
+  display: inline-block;
+  padding: 2px var(--space-sm);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border);
+  font-family: var(--font-display);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-decoration: none;
+  cursor: help;
+  transition: border-color var(--transition-fast);
+}
+
+.tag:hover {
+  text-decoration: none;
+}
+
+.tagPenalised {
+  color: var(--color-negative);
+  border-color: rgba(239, 68, 68, 0.4);
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.tagPenalised:hover {
+  border-color: var(--color-negative);
+}
+
+.tagNeutral {
+  color: var(--color-accent2);
+  background: rgba(212, 201, 160, 0.1);
+}
+
+.tagNeutral:hover {
+  border-color: var(--color-accent2);
 }
 
 .externalLinks {
@@ -127,6 +173,9 @@
 
 .headerStats {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  flex: 1 1 auto;
   gap: var(--space-sm);
 }
 
@@ -157,7 +206,34 @@
   color: var(--color-negative);
 }
 
+.winLossSep {
+  color: var(--color-text-muted);
+  margin: 0 1px;
+}
+
+.ratingBreakdown {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-xs);
+  font-size: var(--text-micro);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+  cursor: help;
+}
+
+.rawRatingValue {
+  color: var(--color-text-muted);
+  text-decoration: line-through;
+}
+
+.penaltyValue {
+  color: var(--color-negative);
+}
+
 .statLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   font-size: 10px;
   color: var(--color-text-muted);
   text-transform: uppercase;

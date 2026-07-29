@@ -3,6 +3,8 @@ import { useParams, Link, useNavigate } from 'react-router-dom'
 import { usePlayerData, usePlayerMatches, usePlayerStats, useAuth } from '../api'
 import { getAbilityById, getHeroById, isAbilityId } from '../data'
 import { heroMiniUrl, heroImageUrl } from '../config'
+import { InfoHint } from '../components/InfoHint'
+import { getRatingTag } from '../utils/ratingTags'
 import type { PlayerMatch, PlayerMatchPlayer, SpellStat, WinLossStats } from '../types/player'
 import styles from './Player.module.css'
 
@@ -293,7 +295,8 @@ export function PlayerPage() {
     if (!player || processedMatches.length === 0) return []
 
     const history: { rating: number; delta: number; won: boolean; matchId: number }[] = []
-    let currentRating = player.rating
+    // Match deltas are raw TrueSkill movements, so walk back from the raw rating
+    let currentRating = player.rawRating ?? player.rating
 
     // Add current rating as the most recent point
     // Then work backwards through matches to calculate historical ratings
@@ -337,6 +340,14 @@ export function PlayerPage() {
 
   const steam64Id = BigInt(player.steamId) + BigInt('76561197960265728')
 
+  const penaltyPct = player.penaltyPct ?? 0
+  const hasPenalty = penaltyPct > 0
+  const activePenalties = (player.penalties ?? []).filter(p => p.pct > 0)
+  const penaltyReasons = activePenalties
+    .map(p => `${getRatingTag(p.type).label} −${p.pct.toFixed(1)}%`)
+    .join(', ')
+  const penaltyHint = `Raw TrueSkill rating of ${formatRatingWhole(player.rawRating ?? player.rating)}, less a ${penaltyPct.toFixed(1)}% penalty${penaltyReasons ? ` (${penaltyReasons})` : ''}.`
+
   return (
     <div className={styles.page}>
       {/* Profile Header */}
@@ -346,6 +357,23 @@ export function PlayerPage() {
           <h1 className={styles.nickname}>{player.nickname}</h1>
           <div className={styles.headerMeta}>
             <span className={styles.regionBadge}>{player.region}</span>
+            {player.tags && player.tags.length > 0 && (
+              <div className={styles.tagList}>
+                {player.tags.map(tag => {
+                  const info = getRatingTag(tag)
+                  return (
+                    <Link
+                      key={tag}
+                      to="/about#account-tags"
+                      className={`${styles.tag} ${info.effect === 'tag-only' ? styles.tagNeutral : styles.tagPenalised}`}
+                      data-hint={info.description}
+                    >
+                      {info.label}
+                    </Link>
+                  )
+                })}
+              </div>
+            )}
             <div className={styles.externalLinks}>
               <a
                 href={`https://www.dotabuff.com/players/${player.steamId}`}
@@ -380,7 +408,16 @@ export function PlayerPage() {
         <div className={styles.headerStats}>
           <div className={styles.statBox}>
             <span className={styles.statValue}>{formatRatingWhole(player.rating)}</span>
-            <span className={styles.statLabel}>Rating</span>
+            {hasPenalty && player.rawRating != null && (
+              <span className={styles.ratingBreakdown} data-hint={penaltyHint}>
+                <span className={styles.rawRatingValue}>{formatRatingWhole(player.rawRating)}</span>
+                <span className={styles.penaltyValue}>−{penaltyPct.toFixed(1)}%</span>
+              </span>
+            )}
+            <span className={styles.statLabel}>
+              Rating
+              <InfoHint text="Ladder rating: the raw TrueSkill rating after any penalties are applied. This is what ranks you." />
+            </span>
           </div>
           {player.overallRank && (
             <div className={styles.statBox}>
@@ -405,12 +442,12 @@ export function PlayerPage() {
             <span className={styles.statLabel}>Games</span>
           </div>
           <div className={styles.statBox}>
-            <span className={`${styles.statValue} ${styles.statValueWins}`}>{player.wins}</span>
-            <span className={styles.statLabel}>Wins</span>
-          </div>
-          <div className={styles.statBox}>
-            <span className={`${styles.statValue} ${styles.statValueLosses}`}>{player.losses}</span>
-            <span className={styles.statLabel}>Losses</span>
+            <span className={styles.statValue}>
+              <span className={styles.statValueWins}>{player.wins}</span>
+              <span className={styles.winLossSep}>-</span>
+              <span className={styles.statValueLosses}>{player.losses}</span>
+            </span>
+            <span className={styles.statLabel}>Win-Loss</span>
           </div>
           <div className={styles.statBox}>
             <span className={styles.statValue}>{winrate}%</span>

@@ -1,8 +1,17 @@
+export interface RatingPenalty {
+  type: string
+  pct: number
+}
+
 export interface PlayerProfile {
   steamId: number
   nickname: string
   avatar: string
   rating: number
+  rawRating?: number
+  penaltyPct?: number
+  tags?: string[]
+  penalties?: RatingPenalty[]
   region: string
   overallRank: number | null
   regionalRank: number | null

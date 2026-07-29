@@ -1,0 +1,26 @@
+.hint {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-surface);
+  font-family: var(--font-display);
+  font-weight: var(--weight-bold);
+  font-size: 9px;
+  line-height: 1;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  cursor: help;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.hint:hover,
+.hint:focus-visible {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+  text-decoration: none;
+}

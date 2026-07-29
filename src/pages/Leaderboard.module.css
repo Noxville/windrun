@@ -92,6 +92,48 @@
 }
 
 /* ============================================
+   RATING / PENALTY / TAGS
+   ============================================ */
+.emptyCell {
+  color: var(--color-text-muted);
+}
+
+.penalty {
+  font-family: var(--font-body);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-negative);
+}
+
+.tagCell {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: var(--space-xs);
+}
+
+.tagChip {
+  padding: 1px 3px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  font-family: var(--font-display);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0;
+  white-space: nowrap;
+  cursor: help;
+}
+
+.tagChipPenalised {
+  color: var(--color-negative);
+  border-color: rgba(239, 68, 68, 0.4);
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.tagChipNeutral {
+  color: var(--color-accent2);
+  background: rgba(212, 201, 160, 0.1);
+}
+
+/* ============================================
    EXTERNAL LINKS
    ============================================ */
 .linksCell {
