@@ -19,9 +19,9 @@ interface LeaderboardApiResponse {
   data: Array<{
     steamId: number
     rating: number
-    rawRating?: number
-    penaltyPct?: number
-    tags?: string[]
+    rawRating?: number | null
+    penaltyPct?: number | null
+    tags?: string[] | null
     winLoss: {
       wins: number
       losses: number
@@ -47,8 +47,8 @@ interface LeaderboardRow {
   matches: number
   wins: number
   winRate: number
-  rating?: number
-  rawRating?: number
+  rating?: number | null
+  rawRating?: number | null
   penaltyPct: number
   tags: string[]
 }
@@ -191,8 +191,8 @@ export function LeaderboardPage() {
         header: 'Raw',
         size: 80,
         cell: info => {
-          const raw = info.getValue() as number | undefined
-          if (raw === undefined) return <span className={styles.emptyCell}>—</span>
+          const raw = info.getValue() as number | null | undefined
+          if (raw == null) return <span className={styles.emptyCell}>—</span>
           return <NumericCell value={raw} decimals={0} />
         },
       },
@@ -201,8 +201,8 @@ export function LeaderboardPage() {
         header: 'Penalty',
         size: 85,
         cell: info => {
-          const pct = info.getValue() as number
-          if (pct <= 0) return <span className={styles.emptyCell}>—</span>
+          const pct = info.getValue() as number | null | undefined
+          if (pct == null || pct <= 0) return <span className={styles.emptyCell}>—</span>
           return <span className={styles.penalty}>−{pct.toFixed(1)}%</span>
         },
       },
@@ -211,8 +211,8 @@ export function LeaderboardPage() {
         header: 'Rating',
         size: 90,
         cell: info => {
-          const rating = info.getValue() as number | undefined
-          if (rating === undefined) return <span className={styles.emptyCell}>—</span>
+          const rating = info.getValue() as number | null | undefined
+          if (rating == null) return <span className={styles.emptyCell}>—</span>
           return <NumericCell value={rating} decimals={0} />
         },
       },

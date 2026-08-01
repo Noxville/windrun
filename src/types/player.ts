@@ -8,10 +8,10 @@ export interface PlayerProfile {
   nickname: string
   avatar: string
   rating: number
-  rawRating?: number
-  penaltyPct?: number
-  tags?: string[]
-  penalties?: RatingPenalty[]
+  rawRating?: number | null
+  penaltyPct?: number | null
+  tags?: string[] | null
+  penalties?: RatingPenalty[] | null
   region: string
   overallRank: number | null
   regionalRank: number | null
