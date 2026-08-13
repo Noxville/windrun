@@ -4,7 +4,7 @@ import { usePlayerData, usePlayerMatches, usePlayerStats, useAuth } from '../api
 import { getAbilityById, getHeroById, isAbilityId } from '../data'
 import { heroMiniUrl, heroImageUrl } from '../config'
 import { InfoHint } from '../components/InfoHint'
-import { getRatingTag } from '../utils/ratingTags'
+import { getRatingTag, MIN_VISIBLE_PENALTY_PCT } from '../utils/ratingTags'
 import type { PlayerMatch, PlayerMatchPlayer, SpellStat, WinLossStats } from '../types/player'
 import styles from './Player.module.css'
 
@@ -341,8 +341,12 @@ export function PlayerPage() {
   const steam64Id = BigInt(player.steamId) + BigInt('76561197960265728')
 
   const penaltyPct = player.penaltyPct ?? 0
-  const hasPenalty = penaltyPct > 0
-  const activePenalties = (player.penalties ?? []).filter(p => p.pct > 0)
+  const hasPenalty = penaltyPct >= MIN_VISIBLE_PENALTY_PCT
+  const activePenalties = (player.penalties ?? []).filter(p => p.pct >= MIN_VISIBLE_PENALTY_PCT)
+  const hiddenPenalties = new Set(
+    (player.penalties ?? []).filter(p => p.pct < MIN_VISIBLE_PENALTY_PCT).map(p => p.type)
+  )
+  const visibleTags = (player.tags ?? []).filter(tag => !hiddenPenalties.has(tag))
   const penaltyReasons = activePenalties
     .map(p => `${getRatingTag(p.type).label} −${p.pct.toFixed(1)}%`)
     .join(', ')
@@ -357,9 +361,9 @@ export function PlayerPage() {
           <h1 className={styles.nickname}>{player.nickname}</h1>
           <div className={styles.headerMeta}>
             <span className={styles.regionBadge}>{player.region}</span>
-            {player.tags && player.tags.length > 0 && (
+            {visibleTags.length > 0 && (
               <div className={styles.tagList}>
-                {player.tags.map(tag => {
+                {visibleTags.map(tag => {
                   const info = getRatingTag(tag)
                   return (
                     <Link

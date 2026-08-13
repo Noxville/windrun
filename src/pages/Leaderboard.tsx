@@ -4,7 +4,7 @@ import type { ColumnDef } from '@tanstack/react-table'
 import { PageShell } from '../components/PageShell'
 import { DataTable, NumericCell, GradientCell } from '../components'
 import { usePersistedQuery } from '../api'
-import { getRatingTag, EFFECT_LABEL } from '../utils/ratingTags'
+import { getRatingTag, EFFECT_LABEL, MIN_VISIBLE_PENALTY_PCT } from '../utils/ratingTags'
 import styles from './Leaderboard.module.css'
 
 const REGIONS = [
@@ -78,21 +78,29 @@ export function LeaderboardPage() {
 
   const statsData = useMemo<LeaderboardRow[]>(() => {
     if (!apiResponse?.data || !Array.isArray(apiResponse.data)) return []
-    return apiResponse.data.map(player => ({
-      rank: isRegionalView ? player.regionalRank : player.overallRank,
-      globalRank: player.overallRank,
-      region: player.region,
-      playerId: player.steamId,
-      playerName: player.nickname,
-      profilePicture: player.avatar,
-      matches: player.winLoss.total,
-      wins: player.winLoss.wins,
-      winRate: player.winLoss.winrate * 100,
-      rating: player.rating,
-      rawRating: player.rawRating,
-      penaltyPct: player.penaltyPct ?? 0,
-      tags: player.tags ?? [],
-    }))
+    return apiResponse.data.map(player => {
+      // Sub-threshold penalties still hit the rating but are not surfaced, and
+      // the leaderboard payload has no per-penalty breakdown to attribute them.
+      const penaltyPct = player.penaltyPct ?? 0
+      const showPenalty = penaltyPct >= MIN_VISIBLE_PENALTY_PCT
+      return {
+        rank: isRegionalView ? player.regionalRank : player.overallRank,
+        globalRank: player.overallRank,
+        region: player.region,
+        playerId: player.steamId,
+        playerName: player.nickname,
+        profilePicture: player.avatar,
+        matches: player.winLoss.total,
+        wins: player.winLoss.wins,
+        winRate: player.winLoss.winrate * 100,
+        rating: player.rating,
+        rawRating: player.rawRating,
+        penaltyPct: showPenalty ? penaltyPct : 0,
+        tags: (player.tags ?? []).filter(
+          tag => showPenalty || getRatingTag(tag).effect !== 'penalised'
+        ),
+      }
+    })
   }, [apiResponse, isRegionalView])
 
   const columns = useMemo<ColumnDef<LeaderboardRow>[]>(() => {

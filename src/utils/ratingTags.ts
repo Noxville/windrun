@@ -7,6 +7,10 @@ export interface RatingTagInfo {
   description: string
 }
 
+// Penalties below this threshold are applied to the rating but not surfaced:
+// no tag, no penalty figure, no breakdown.
+export const MIN_VISIBLE_PENALTY_PCT = 1
+
 export const EFFECT_LABEL: Record<TagEffect, string> = {
   penalised: 'penalised',
   'tag-only': 'tag only',
