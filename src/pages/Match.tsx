@@ -5,6 +5,7 @@ import { AbilityIcon } from '../components'
 import { usePersistedQuery } from '../api'
 import { getHeroById, getAbilityById, getItemById } from '../data'
 import { heroMiniUrl, itemIconUrl } from '../config'
+import { fixHeroSwaps } from '../utils/heroSwaps'
 import styles from './Match.module.css'
 
 interface PlayerData {
@@ -176,34 +177,6 @@ function getWinrateColor(winrate: number): string {
     const g = Math.round(200 + intensity * 40) // 200 -> 240
     const b = Math.round(50 + intensity * 30) // 50 -> 80
     return `rgb(${r}, ${g}, ${b})`
-  }
-}
-
-// Fix hero swap bug
-function fixHeroSwaps(radiant: PlayerData[], dire: PlayerData[]): { radiant: PlayerData[]; dire: PlayerData[] } {
-  const allPlayers = [...radiant, ...dire]
-  const fixedPlayers = allPlayers.map(p => ({ ...p, abilities: [...p.abilities] }))
-
-  for (let i = 0; i < fixedPlayers.length; i++) {
-    const player = fixedPlayers[i]
-    const heroInnateIdx = player.abilities.findIndex(a => a < 0)
-    if (heroInnateIdx === -1) continue
-
-    const innateHeroId = Math.abs(player.abilities[heroInnateIdx])
-
-    if (innateHeroId !== player.hero) {
-      const swapPartner = fixedPlayers.find(p => p.hero === innateHeroId && p !== player)
-      if (swapPartner) {
-        const temp = player.abilities
-        player.abilities = swapPartner.abilities
-        swapPartner.abilities = temp
-      }
-    }
-  }
-
-  return {
-    radiant: fixedPlayers.slice(0, 5),
-    dire: fixedPlayers.slice(5),
   }
 }
 

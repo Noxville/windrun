@@ -5,6 +5,7 @@ import { getAbilityById, getHeroById, isAbilityId } from '../data'
 import { heroMiniUrl, heroImageUrl } from '../config'
 import { InfoHint } from '../components/InfoHint'
 import { getRatingTag, MIN_VISIBLE_PENALTY_PCT } from '../utils/ratingTags'
+import { fixHeroSwaps } from '../utils/heroSwaps'
 import type { PlayerMatch, PlayerMatchPlayer, SpellStat, WinLossStats } from '../types/player'
 import styles from './Player.module.css'
 
@@ -262,12 +263,13 @@ export function PlayerPage() {
 
     return matchesResponse
       .map((match: PlayerMatch) => {
+        const { radiant, dire } = fixHeroSwaps(match.radiant ?? [], match.dire ?? [])
         // Find the player in radiant or dire
-        let playerData = match.radiant?.find(p => p.steamId === playerIdNum)
+        let playerData = radiant.find(p => p.steamId === playerIdNum)
         let isRadiant = true
 
         if (!playerData) {
-          playerData = match.dire?.find(p => p.steamId === playerIdNum)
+          playerData = dire.find(p => p.steamId === playerIdNum)
           isRadiant = false
         }
 

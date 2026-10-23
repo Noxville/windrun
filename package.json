@@ -8,6 +8,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
+    "test:swaps": "node --test scripts/hero-swaps.test.mjs",
     "preview": "vite preview",
     "update-static": "node scripts/update-static-data.cjs"
   },
