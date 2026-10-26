@@ -1,0 +1,37 @@
+.colHeader {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--text-caption);
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+}
+
+.colHeaderLabel {
+  display: flex;
+  flex-direction: column;
+}
+
+.hint {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  font-size: 10px;
+  line-height: 1;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  text-transform: none;
+  cursor: help;
+  transition:
+    color var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.hint:hover {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}

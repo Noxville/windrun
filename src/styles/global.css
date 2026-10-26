@@ -162,6 +162,10 @@ a:hover {
   max-width: 1600px;
 }
 
+.app-main.app-main-80 > * {
+  max-width: 80vw;
+}
+
 .app-header {
   background: var(--color-bg-elevated);
   border-bottom: 1px solid var(--color-border);

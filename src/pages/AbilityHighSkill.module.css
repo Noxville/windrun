@@ -1,0 +1,32 @@
+/* ============================================
+   ABILITY VALUE
+   ============================================ */
+.signed {
+  font-variant-numeric: tabular-nums;
+}
+
+.signedUp {
+  color: var(--color-accent);
+}
+
+.signedDown {
+  color: var(--color-warning);
+}
+
+.mispricing {
+  font-variant-numeric: tabular-nums;
+  cursor: help;
+}
+
+.rankValue {
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+}
+
+.valuesNote {
+  margin: 0 0 var(--space-md);
+  font-family: var(--font-body);
+  font-weight: var(--weight-light);
+  font-size: var(--text-caption);
+  color: var(--color-text-muted);
+}

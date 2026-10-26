@@ -428,6 +428,54 @@
   height: calc(var(--space-3xl) * 2);
 }
 
+.sideColumn {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  min-width: 0;
+}
+
+.highlights {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding: var(--space-sm);
+}
+
+.videoWrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--color-bg);
+}
+
+.video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.channelLink {
+  display: block;
+  padding: var(--space-xs) var(--space-md);
+  background: var(--color-bg-elevated);
+  border-radius: var(--radius-sm);
+  color: var(--color-accent);
+  font-size: var(--text-caption);
+  font-weight: var(--weight-bold);
+  text-align: center;
+  text-decoration: none;
+  transition: background 0.15s ease;
+}
+
+.channelLink:hover {
+  background: var(--color-bg-surface);
+}
+
 /* ============================================
    RESPONSIVE
    ============================================ */

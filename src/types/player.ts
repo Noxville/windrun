@@ -1,3 +1,16 @@
+// The API rejects an unrecognised window rather than falling back to lifetime
+export type StatsWindow = 'lifetime' | '6m' | '12m'
+
+export const STATS_WINDOWS: ReadonlyArray<{ id: StatsWindow; label: string }> = [
+  { id: 'lifetime', label: 'Lifetime' },
+  { id: '12m', label: '12 Months' },
+  { id: '6m', label: '6 Months' },
+]
+
+export function isStatsWindow(value: string | null | undefined): value is StatsWindow {
+  return STATS_WINDOWS.some(w => w.id === value)
+}
+
 export interface RatingPenalty {
   type: string
   pct: number

@@ -1,4 +1,5 @@
 export type { Hero, HeroMap } from './hero'
 export type { Ability } from './ability'
-export type { PlayerProfile, RatingPenalty, PlayerMatch, PlayerMatchPlayer, PlayerStats, WinLossStats, AllyRivalStats, SpellStat } from './player'
+export type { PlayerProfile, RatingPenalty, PlayerMatch, PlayerMatchPlayer, PlayerStats, WinLossStats, AllyRivalStats, SpellStat, StatsWindow } from './player'
+export { STATS_WINDOWS, isStatsWindow } from './player'
 export type { LeagueMatch, LeagueInfo } from './league'

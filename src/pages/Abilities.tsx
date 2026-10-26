@@ -13,10 +13,13 @@ import {
   PatchSelector,
   usePatchSelection,
   useDataTableDisplayIndex,
+  ColHeader,
 } from '../components'
 import { usePersistedQuery } from '../api'
 import { heroMiniUrl } from '../config'
 import { getAbilityById, getHeroById } from '../data'
+import { useAbilityValues, hasRank } from '../utils/abilityValue'
+import { useWidePage } from '../utils/useWidePage'
 
 // API response format
 interface AbilitiesApiResponse {
@@ -33,7 +36,6 @@ interface AbilitiesApiResponse {
       winrate: number
       pickRate: number
     }>
-    abilityValuations: Record<string, number>
   }
 }
 
@@ -57,7 +59,19 @@ interface AbilityStatsRow {
   prevWinRate: number | null
   avgPickPosDelta: number | null
   winRateDelta: number | null
-  value: number | null    // ability valuation (picked early/late relative to expected)
+  strength: number | null     // win rate points the ability contributes
+  mispricing: number | null   // draftRank - strengthRank, in places; null when the server left it unranked
+  strengthRank: number | null
+  draftRank: number | null
+}
+
+function SignedCell({ value, decimals }: { value: number; decimals: number }) {
+  const cls = value > 0 ? styles.signedUp : value < 0 ? styles.signedDown : ''
+  return (
+    <span className={`${styles.signed} ${cls}`}>
+      {value > 0 ? '+' : ''}{value.toFixed(decimals)}
+    </span>
+  )
 }
 
 function RankCell() {
@@ -70,9 +84,10 @@ function RankCell() {
   )
 }
 
-const DEFAULT_SORTING: SortingState = [{ id: 'winRate', desc: true }]
+const DEFAULT_SORTING: SortingState = [{ id: 'strength', desc: true }]
 
 export function AbilitiesPage() {
+  useWidePage()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const [sorting, setSorting] = useState<SortingState>(DEFAULT_SORTING)
@@ -104,7 +119,14 @@ export function AbilitiesPage() {
     { enabled: !!prevPatch }
   )
 
-  const isLoading = currentLoading || (prevPatch && prevLoading)
+  const {
+    values: abilityValues,
+    total: valuesTotal,
+    isLoading: valuesLoading,
+    unavailable: valuesUnavailable,
+  } = useAbilityValues(currentPatch)
+
+  const isLoading = currentLoading || (prevPatch && prevLoading) || valuesLoading
 
   // Build lookup for previous patch stats by abilityId
   const prevStatsMap = useMemo(() => {
@@ -120,8 +142,6 @@ export function AbilitiesPage() {
   const statsData = useMemo<AbilityStatsRow[]>(() => {
     if (!apiResponse?.data?.abilityStats) return []
 
-    const valuations = apiResponse.data.abilityValuations ?? {}
-
     return apiResponse.data.abilityStats
       .map(stat => {
         const isHeroAbility = stat.abilityId < 0
@@ -133,8 +153,8 @@ export function AbilitiesPage() {
         const ownerHeroId = isHeroAbility ? heroIdFromAbility : stat.ownerHero
         const ownerHeroData = ownerHeroId ? getHeroById(ownerHeroId) : undefined
 
-        // Get valuation from the map (key is string)
-        const valuation = valuations[String(stat.abilityId)] ?? null
+        const abilityValue = abilityValues?.get(stat.abilityId) ?? null
+        const ranked = abilityValue !== null && hasRank(abilityValue)
 
         // Previous patch stats
         const prev = prevStatsMap?.get(stat.abilityId)
@@ -164,11 +184,14 @@ export function AbilitiesPage() {
           prevWinRate,
           avgPickPosDelta: prevAvgPickPos !== null ? avgPickPos - prevAvgPickPos : null,
           winRateDelta: prevWinRate !== null ? winRate - prevWinRate : null,
-          value: valuation,
+          strength: abilityValue?.strength ?? null,
+          mispricing: ranked ? abilityValue.mispricing : null,
+          strengthRank: ranked ? abilityValue.strengthRank : null,
+          draftRank: abilityValue?.draftRank ?? null,
         }
       })
       .filter(row => row.picks > 0 && row.abilityName && !row.abilityName.startsWith('special_bonus'))
-  }, [apiResponse, prevStatsMap])
+  }, [apiResponse, prevStatsMap, abilityValues])
 
   // Calculate total games (sum of picks for non-hero abilities divided by 40)
   const totalGames = useMemo(() => {
@@ -266,7 +289,7 @@ export function AbilitiesPage() {
         header: () => <span style={{ color: 'var(--color-text-muted)' }}>{prevPatch ?? 'Previous'}</span>,
         columns: [
           columnHelper.accessor('prevWinRate', {
-            header: 'Win Rate',
+            header: () => <ColHeader label="Win Rate" />,
             size: 90,
             cell: info => {
               const value = info.getValue()
@@ -283,7 +306,7 @@ export function AbilitiesPage() {
             },
           }),
           columnHelper.accessor('prevAvgPickPos', {
-            header: 'Avg Pick',
+            header: () => <ColHeader label="Avg Pick" />,
             size: 90,
             cell: info => {
               const value = info.getValue()
@@ -308,7 +331,7 @@ export function AbilitiesPage() {
         header: () => <span style={{ color: 'var(--color-accent)' }}>{currentPatch ?? 'Current'}</span>,
         columns: [
           columnHelper.accessor('winRate', {
-            header: 'Win Rate',
+            header: () => <ColHeader label="Win Rate" />,
             size: 90,
             meta: { hasBorderLeft: true },
             cell: info => (
@@ -322,7 +345,7 @@ export function AbilitiesPage() {
             ),
           }),
           columnHelper.accessor('winRateDelta', {
-            header: 'ΔWR',
+            header: () => <ColHeader label="ΔWR" />,
             size: 55,
             cell: info => {
               const delta = info.getValue()
@@ -331,7 +354,7 @@ export function AbilitiesPage() {
             },
           }),
           columnHelper.accessor('avgPickPos', {
-            header: 'Avg Pick',
+            header: () => <ColHeader label="Avg Pick" />,
             size: 90,
             cell: info => (
               <GradientCell
@@ -345,7 +368,7 @@ export function AbilitiesPage() {
             ),
           }),
           columnHelper.accessor('avgPickPosDelta', {
-            header: 'ΔPick',
+            header: () => <ColHeader label="ΔPick" />,
             size: 65,
             cell: info => {
               const delta = info.getValue()
@@ -354,7 +377,7 @@ export function AbilitiesPage() {
             },
           }),
           columnHelper.accessor('pickRate', {
-            header: 'Pick Rate',
+            header: () => <ColHeader label="Pick Rate" />,
             size: 90,
             cell: info => (
               <GradientCell
@@ -366,37 +389,68 @@ export function AbilitiesPage() {
               />
             ),
           }),
-          columnHelper.accessor('value', {
+          columnHelper.accessor('strength', {
             header: () => (
-              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                Value
-                <span
-                  title="How early/late this ability is picked relative to its win rate. Positive = picked later than expected (undervalued). Negative = picked earlier than expected (overvalued). See About page for details."
-                  style={{
-                    cursor: 'help',
-                    fontSize: '12px',
-                    color: 'var(--color-text-muted)',
-                    border: '1px solid var(--color-border)',
-                    borderRadius: '50%',
-                    width: '14px',
-                    height: '14px',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  ?
-                </span>
-              </span>
+              <ColHeader
+                label="Strength"
+                hint="What this ability contributes to the team holding it, in win rate points, against an ordinary pick. Fitted across every pick in every match on the patch, so it is not the same as win rate."
+              />
             ),
-            size: 90,
+            size: 78,
             cell: info => {
               const value = info.getValue()
               if (value === null) return <span style={{ color: 'var(--color-text-muted)' }}>—</span>
-              const color = value > 0.02 ? 'var(--color-positive)' : value < -0.02 ? 'var(--color-negative)' : 'var(--color-text)'
+              return <SignedCell value={value} decimals={1} />
+            },
+          }),
+          columnHelper.accessor('strengthRank', {
+            header: () => (
+              <ColHeader
+                label="Str Rank"
+                hint="Where this ability sits when every ability and hero pick is ordered by strength. 1 is the strongest."
+              />
+            ),
+            size: 72,
+            cell: info => {
+              const rank = info.getValue()
+              if (rank === null) return <span style={{ color: 'var(--color-text-muted)' }}>—</span>
+              return <span className={styles.rankValue}>{rank}</span>
+            },
+          }),
+          columnHelper.accessor('draftRank', {
+            header: () => (
+              <ColHeader
+                label="Pick Rank"
+                hint="Where this ability sits when everything is ordered by average pick position. 1 is drafted earliest."
+              />
+            ),
+            size: 74,
+            cell: info => {
+              const rank = info.getValue()
+              if (rank === null) return <span style={{ color: 'var(--color-text-muted)' }}>—</span>
+              return <span className={styles.rankValue}>{rank}</span>
+            },
+          }),
+          columnHelper.accessor('mispricing', {
+            header: () => (
+              <ColHeader
+                label="Value"
+                hint="The gap between what an ability is worth and where the playerbase drafts it, in places. Positive means it goes later than its strength deserves, so you get it cheap."
+              />
+            ),
+            size: 76,
+            cell: info => {
+              const value = info.getValue()
+              if (value === null) return <span style={{ color: 'var(--color-text-muted)' }}>—</span>
+              const row = info.row.original
+              const title =
+                row.draftRank !== null && row.strengthRank !== null
+                  ? `Drafted ${row.draftRank}th of ${valuesTotal}, ${row.strengthRank}th by strength`
+                  : undefined
+              const cls = value > 0 ? styles.signedUp : value < 0 ? styles.signedDown : ''
               return (
-                <span style={{ color, fontVariantNumeric: 'tabular-nums' }}>
-                  {value > 0 ? '+' : ''}{(value * 100).toFixed(1)}%
+                <span className={`${styles.mispricing} ${cls}`} title={title}>
+                  {value > 0 ? '+' : ''}{Math.round(value)}
                 </span>
               )
             },
@@ -404,7 +458,7 @@ export function AbilitiesPage() {
         ],
       }),
     ],
-    [columnHelper, minWinRate, maxWinRate, minPickRate, maxPickRate, minPickPos, maxPickPos, prevPatch, currentPatch]
+    [columnHelper, minWinRate, maxWinRate, minPickRate, maxPickRate, minPickPos, maxPickPos, prevPatch, currentPatch, valuesTotal]
   )
 
   const tableData = useMemo(
@@ -466,6 +520,12 @@ export function AbilitiesPage() {
         </div>
       }
     >
+      {valuesUnavailable && (
+        <p className={styles.valuesNote}>
+          Ability Value is not fitted for {currentPatch} yet. The Value and vs Pick columns stay
+          empty until the next fit runs.
+        </p>
+      )}
       <DataTable
         key={currentPatch ?? ''}
         data={tableData}

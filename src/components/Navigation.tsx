@@ -7,6 +7,7 @@ interface NavItem {
   label: string
   href?: string
   onClick?: () => void
+  external?: boolean
   isNew?: boolean
   children?: { label: string; href: string; description?: string; isNew?: boolean }[]
 }
@@ -47,8 +48,13 @@ const NAV_ITEMS: NavItem[] = [
     href: '/hero-builder',
   },
   {
-    label: 'Leagues Games',
+    label: 'Leagues',
     href: '/league-games',
+  },
+  {
+    label: 'Highlights',
+    href: 'https://www.youtube.com/@windrundota',
+    external: true,
     isNew: true,
   },
   // Game link hidden for now
@@ -168,6 +174,16 @@ export function Navigation() {
                   ))}
                 </div>
               </>
+            ) : item.external ? (
+              <a
+                href={item.href!}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.navLink}
+              >
+                {item.label}
+                {item.isNew && <span className={styles.newBadge}>new</span>}
+              </a>
             ) : item.onClick ? (
               <button
                 className={styles.navLink}

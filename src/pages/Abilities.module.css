@@ -30,3 +30,40 @@
   background: rgba(45, 212, 191, 0.1);
   border-color: var(--color-accent);
 }
+
+/* ============================================
+   ABILITY VALUE
+   ============================================ */
+
+
+
+
+.valuesNote {
+  margin: 0 0 var(--space-md);
+  font-family: var(--font-body);
+  font-weight: var(--weight-light);
+  font-size: var(--text-caption);
+  color: var(--color-text-muted);
+}
+
+.signed {
+  font-variant-numeric: tabular-nums;
+}
+
+.signedUp {
+  color: var(--color-accent);
+}
+
+.signedDown {
+  color: var(--color-warning);
+}
+
+.mispricing {
+  font-variant-numeric: tabular-nums;
+  cursor: help;
+}
+
+.rankValue {
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+}

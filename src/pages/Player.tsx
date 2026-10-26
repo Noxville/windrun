@@ -1,11 +1,12 @@
 import { useState, useEffect, useMemo } from 'react'
-import { useParams, Link, useNavigate } from 'react-router-dom'
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom'
 import { usePlayerData, usePlayerMatches, usePlayerStats, useAuth } from '../api'
 import { getAbilityById, getHeroById, isAbilityId } from '../data'
 import { heroMiniUrl, heroImageUrl } from '../config'
 import { InfoHint } from '../components/InfoHint'
 import { getRatingTag, MIN_VISIBLE_PENALTY_PCT } from '../utils/ratingTags'
-import type { PlayerMatch, PlayerMatchPlayer, SpellStat, WinLossStats } from '../types/player'
+import type { PlayerMatch, PlayerMatchPlayer, SpellStat, WinLossStats, StatsWindow } from '../types/player'
+import { STATS_WINDOWS, isStatsWindow } from '../types/player'
 import styles from './Player.module.css'
 
 function formatRatingWhole(rating: number): string {
@@ -224,6 +225,7 @@ type SortField = 'games' | 'winrate'
 export function PlayerPage() {
   const { playerId: rawPlayerId } = useParams()
   const navigate = useNavigate()
+  const { hash } = useLocation()
   const { user, isLoading: authLoading, login } = useAuth()
   const [page, setPage] = useState(0)
   const [matchPage, setMatchPage] = useState(0) // 0 = first 10, 1 = middle 10, 2 = last 10
@@ -251,7 +253,27 @@ export function PlayerPage() {
 
   const { data: playerResponse, isLoading: playerLoading, error: playerError } = usePlayerData(playerId ?? '')
   const { data: matchesResponse, isLoading: matchesLoading } = usePlayerMatches(playerId ?? '', page)
-  const { data: statsResponse, isLoading: statsLoading } = usePlayerStats(playerId ?? '')
+  const statsWindow = useMemo<StatsWindow>(() => {
+    const value = new URLSearchParams(hash.replace(/^#/, '')).get('window')
+    return isStatsWindow(value) ? value : 'lifetime'
+  }, [hash])
+
+  const setStatsWindow = (next: StatsWindow) => {
+    const params = new URLSearchParams(hash.replace(/^#/, ''))
+    if (next === 'lifetime') {
+      params.delete('window')
+    } else {
+      params.set('window', next)
+    }
+    const fragment = params.toString()
+    navigate({ hash: fragment ? `#${fragment}` : '' }, { replace: true })
+  }
+
+  const {
+    data: statsResponse,
+    isLoading: statsLoading,
+    isFetching: isStatsFetching,
+  } = usePlayerStats(playerId ?? '', statsWindow)
 
   const player = playerResponse?.data
   const stats = statsResponse?.stats
@@ -458,6 +480,25 @@ export function PlayerPage() {
             <span className={styles.statLabel}>Win Rate</span>
           </div>
         </div>
+      </div>
+
+      {/* Stats window selector */}
+      <div className={styles.statsControls}>
+        <span className={styles.statsControlsLabel}>Stats window</span>
+        <div className={styles.windowSelector} role="group" aria-label="Stats window">
+          {STATS_WINDOWS.map(option => (
+            <button
+              key={option.id}
+              type="button"
+              className={`${styles.windowButton} ${statsWindow === option.id ? styles.windowButtonActive : ''}`}
+              aria-pressed={statsWindow === option.id}
+              onClick={() => setStatsWindow(option.id)}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+        {isStatsFetching && <span className={styles.statsControlsNote}>Updating…</span>}
       </div>
 
       {statsLoading && <div className={styles.loading}>Loading stats...</div>}

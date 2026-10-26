@@ -237,12 +237,13 @@ function DeltaChart() {
 }
 
 export function AboutPage() {
-  const { hash } = useLocation()
+  const { hash, key } = useLocation()
 
+  // key changes on every navigation, so repeat clicks on the same anchor re-scroll
   useEffect(() => {
     if (!hash) return
     document.getElementById(hash.slice(1))?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  }, [hash])
+  }, [hash, key])
 
   return (
     <PageShell title="About">
@@ -331,26 +332,64 @@ export function AboutPage() {
           </p>
         </section>
 
-        <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>Ability Valuation</h2>
+        <section className={styles.section} id="ability-value">
+          <h2 className={styles.sectionTitle}>Ability Value</h2>
           <p className={styles.text}>
-            The "Value" column on the Abilities page shows how early or late an ability is typically
-            picked relative to its actual win rate performance.
+            The Abilities page carries two numbers for every ability and hero pick. One is what the
+            ability is worth. The other is how far the playerbase is from agreeing.
+          </p>
+          <dl className={styles.terms}>
+            <dt className={styles.term}>Strength</dt>
+            <dd className={styles.termBody}>
+              What the ability contributes to the team holding it, in win rate points, against an
+              ordinary pick. It comes from one model fitted over every match on the patch: all fifty
+              picks from both sides go in, along with who won, and the model solves for the value per
+              ability that best explains the results. Because every pick in a match sits in the same
+              equation, an ability is separated from the rest of the draft around it.
+            </dd>
+            <dt className={styles.term}>Average Pick</dt>
+            <dd className={styles.termBody}>
+              Where the playerbase actually takes it. This is the price an ability costs you, measured
+              in draft position rather than win rate points.
+            </dd>
+            <dt className={styles.term}>Value</dt>
+            <dd className={styles.termBody}>
+              The gap between the two. We rank every ability by strength, rank it again by draft
+              order, and subtract. The result is in places, so a Value of +550 means an ability is
+              drafted 550 positions later than its strength deserves.
+            </dd>
+          </dl>
+          <p className={styles.text}>
+            Strength is reality. Average pick is perception. Value is the distance between them, and
+            that distance is the part nobody can work out for themselves.
           </p>
           <ul className={styles.list}>
             <li>
-              <strong>Positive values (green)</strong>: The ability is picked later than its win rate
-              suggests it should be. This could be an undervalued pick worth targeting.
+              <strong>Positive Value (teal)</strong>: drafted later than its strength deserves. The
+              playerbase is underrating it, so you get it cheap. These are the picks worth targeting.
             </li>
             <li>
-              <strong>Negative values (red)</strong>: The ability is picked earlier than its win rate
-              suggests it should be. Players may be overvaluing this ability.
+              <strong>Negative Value (amber)</strong>: drafted earlier than its strength deserves.
+              The playerbase is overrating it, and you pay more than it returns.
             </li>
             <li>
-              <strong>Values near zero</strong>: The ability is picked at approximately the "correct"
-              position relative to its performance.
+              <strong>Value near zero</strong>: the draft order already matches the strength order,
+              so the playerbase is pricing it about right.
             </li>
           </ul>
+          <p className={styles.text}>
+            Strength belongs to the ability and does not move. An ability is worth the same whether
+            it goes first or somehow survives to the fiftieth pick, because it is the same spell
+            either way. Getting a strong ability late is the best case, not the worst: the pick you
+            spent on it would ordinarily have returned very little.
+          </p>
+          <p className={styles.note}>
+            Abilities whose strength cannot be told apart from zero are left blank rather than
+            ranked, because a rank drawn from noise would produce a Value drawn from noise. Each
+            patch is fitted on its own, so numbers from one patch are not comparable with another.
+            This is a draft-only measure: it does not know who was playing, and a good player on a
+            weak draft still beats a poor one on a strong draft plenty of the time.
+          </p>
         </section>
 
         <section className={styles.section}>

@@ -27,6 +27,10 @@ interface PatchesApiResponse {
   data: Record<string, PatchInfo>
 }
 
+const REPLAYS_PER_PAGE = 6
+const YOUTUBE_CHANNEL = 'https://www.youtube.com/@windrundota'
+const YOUTUBE_PLAYLIST = 'PLWh0jvx55oPw'
+
 interface RecommendedMatch {
   matchId: number
   region: string
@@ -668,82 +672,109 @@ export function HomePage() {
           </div>
         )}
 
-        {/* Recommended Replays */}
-        {apiResponse?.data?.recommendedReplays?.matches && apiResponse.data.recommendedReplays.matches.length > 0 && (
+        <div className={styles.sideColumn}>
+          {/* Highlights */}
           <div className={styles.tableSection}>
-            <h3 className={styles.tableTitle}>Recommended Replays</h3>
-            <div className={styles.replaysGrid}>
-              {apiResponse.data.recommendedReplays.matches
-                .slice(replayPage * 11, replayPage * 11 + 11)
-                .map(match => (
-                  <Link
-                    key={match.matchId}
-                    to={`/matches/${match.matchId}`}
-                    className={styles.replayCard}
-                  >
-                    <div className={styles.replayInfo}>
-                      <span className={styles.replayRegion}>{match.region.toUpperCase()}</span>
-                      {match.tags?.[0] && (
-                        <span
-                          className={styles.replayTag}
-                          style={{ color: getTagColor(match.tags[0]) }}
-                        >
-                          {formatTag(match.tags[0])}
-                        </span>
-                      )}
-                    </div>
-                    <div className={styles.replayRankCol}>
-                      <span className={styles.replayRankLabel}>Avg Rank</span>
-                      <span className={styles.replayRank}>{match.avgRank.toLocaleString()}</span>
-                    </div>
-                    <div className={styles.replayTeams}>
-                      <div className={styles.replayTeamRadiant}>
-                        {match.radiant.map((heroId, idx) => {
-                          const hero = getHeroById(heroId)
-                          return hero ? (
-                            <img
-                              key={idx}
-                              src={heroMiniUrl(hero.picture)}
-                              alt={hero.englishName}
-                              className={styles.replayHero}
-                              title={hero.englishName}
-                            />
-                          ) : null
-                        })}
-                      </div>
-                      <div className={styles.replayTeamDire}>
-                        {match.dire.map((heroId, idx) => {
-                          const hero = getHeroById(heroId)
-                          return hero ? (
-                            <img
-                              key={idx}
-                              src={heroMiniUrl(hero.picture)}
-                              alt={hero.englishName}
-                              className={styles.replayHero}
-                              title={hero.englishName}
-                            />
-                          ) : null
-                        })}
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-            </div>
-            {apiResponse.data.recommendedReplays.matches.length > 11 && (
-              <div className={styles.replaysPagination}>
-                {Array.from({ length: Math.ceil(apiResponse.data.recommendedReplays.matches.length / 11) }).map((_, idx) => (
-                  <button
-                    key={idx}
-                    className={`${styles.pageButton} ${replayPage === idx ? styles.pageButtonActive : ''}`}
-                    onClick={() => setReplayPage(idx)}
-                  >
-                    {idx + 1}
-                  </button>
-                ))}
+            <h3 className={styles.tableTitle}>Highlights</h3>
+            <div className={styles.highlights}>
+              <div className={styles.videoWrap}>
+                <iframe
+                  className={styles.video}
+                  src={`https://www.youtube-nocookie.com/embed/videoseries?list=${YOUTUBE_PLAYLIST}`}
+                  title="Windrun Ability Draft highlights"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  loading="lazy"
+                />
               </div>
-            )}
+              <a
+                href={YOUTUBE_CHANNEL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.channelLink}
+              >
+                More highlights on YouTube
+              </a>
+            </div>
           </div>
-        )}
+
+          {/* Recommended Replays */}
+          {apiResponse?.data?.recommendedReplays?.matches && apiResponse.data.recommendedReplays.matches.length > 0 && (
+            <div className={styles.tableSection}>
+              <h3 className={styles.tableTitle}>Recommended Replays</h3>
+              <div className={styles.replaysGrid}>
+                {apiResponse.data.recommendedReplays.matches
+                  .slice(replayPage * REPLAYS_PER_PAGE, replayPage * REPLAYS_PER_PAGE + REPLAYS_PER_PAGE)
+                  .map(match => (
+                    <Link
+                      key={match.matchId}
+                      to={`/matches/${match.matchId}`}
+                      className={styles.replayCard}
+                    >
+                      <div className={styles.replayInfo}>
+                        <span className={styles.replayRegion}>{match.region.toUpperCase()}</span>
+                        {match.tags?.[0] && (
+                          <span
+                            className={styles.replayTag}
+                            style={{ color: getTagColor(match.tags[0]) }}
+                          >
+                            {formatTag(match.tags[0])}
+                          </span>
+                        )}
+                      </div>
+                      <div className={styles.replayRankCol}>
+                        <span className={styles.replayRankLabel}>Avg Rank</span>
+                        <span className={styles.replayRank}>{match.avgRank.toLocaleString()}</span>
+                      </div>
+                      <div className={styles.replayTeams}>
+                        <div className={styles.replayTeamRadiant}>
+                          {match.radiant.map((heroId, idx) => {
+                            const hero = getHeroById(heroId)
+                            return hero ? (
+                              <img
+                                key={idx}
+                                src={heroMiniUrl(hero.picture)}
+                                alt={hero.englishName}
+                                className={styles.replayHero}
+                                title={hero.englishName}
+                              />
+                            ) : null
+                          })}
+                        </div>
+                        <div className={styles.replayTeamDire}>
+                          {match.dire.map((heroId, idx) => {
+                            const hero = getHeroById(heroId)
+                            return hero ? (
+                              <img
+                                key={idx}
+                                src={heroMiniUrl(hero.picture)}
+                                alt={hero.englishName}
+                                className={styles.replayHero}
+                                title={hero.englishName}
+                              />
+                            ) : null
+                          })}
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+              </div>
+              {apiResponse.data.recommendedReplays.matches.length > REPLAYS_PER_PAGE && (
+                <div className={styles.replaysPagination}>
+                  {Array.from({ length: Math.ceil(apiResponse.data.recommendedReplays.matches.length / REPLAYS_PER_PAGE) }).map((_, idx) => (
+                    <button
+                      key={idx}
+                      className={`${styles.pageButton} ${replayPage === idx ? styles.pageButtonActive : ''}`}
+                      onClick={() => setReplayPage(idx)}
+                    >
+                      {idx + 1}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       <div className={styles.bottomSpacer} />

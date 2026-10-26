@@ -121,10 +121,12 @@ export function DataTable<T>({
     getFilteredRowModel: getFilteredRowModel(),
     globalFilterFn: searchableColumns
       ? (row, _columnId, filterValue) => {
-          const search = filterValue.toLowerCase()
+          const search = String(filterValue).toLowerCase()
+          const original = row.original as Record<string, unknown>
           return searchableColumns.some(col => {
-            // Try column accessor first, then fall back to row.original for non-column fields
-            const value = row.getValue(col) ?? (row.original as Record<string, unknown>)[col]
+            // Read the plain row field first. row.getValue on an id that is not a
+            // column logs an error per row per keystroke and caches nothing.
+            const value = col in original ? original[col] : row.getValue(col)
             return String(value ?? '').toLowerCase().includes(search)
           })
         }

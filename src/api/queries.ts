@@ -15,13 +15,17 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, keepPreviousData } from '@tanstack/react-query'
 import { apiFetch, ApiError } from './client'
-import type { PlayerProfile, PlayerMatch, PlayerStats } from '../types'
+import type { PlayerProfile, PlayerMatch, PlayerStats, StatsWindow } from '../types'
 
 function retryOn503(failureCount: number, error: Error): boolean {
   if (error instanceof ApiError && error.status === 503) {
     return failureCount < 10
+  }
+  // Retrying a client error never changes the answer
+  if (error instanceof ApiError && error.status >= 400 && error.status < 500) {
+    return false
   }
   return failureCount < 3
 }
@@ -83,10 +87,13 @@ export function usePlayerMatches(playerId: string, page: number = 0) {
   })
 }
 
-export function usePlayerStats(playerId: string) {
-  return useQuery<{ stats: PlayerStats }>({
-    queryKey: ['player-stats', playerId],
-    queryFn: () => apiFetch(`/api/v2/players/${playerId}/stats`),
+export function usePlayerStats(playerId: string, window: StatsWindow = 'lifetime') {
+  return useQuery<{ window: StatsWindow; stats: PlayerStats }>({
+    queryKey: ['player-stats', playerId, window],
+    queryFn: () =>
+      apiFetch(`/api/v2/players/${playerId}/stats?window=${window}`),
     staleTime: 60 * 1000,
+    // Keep the old window's panels on screen while the new one loads
+    placeholderData: keepPreviousData,
   })
 }
